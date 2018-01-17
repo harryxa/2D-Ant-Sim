@@ -22,15 +22,22 @@ public class AntClass : MonoBehaviour
 	List<int> pheremonesInRange;	//an array of pheremones within range
 	//prioratisedDirection;			//the direction the ant wants to move in
 
-	private float antSpeed = 5f;
+	//wander variables for getSteering()
+	private float jitterScale = 1f;
+	private float wanderDistance = 2f;
+	private Vector3 wanderTarget;
+	private Vector3 targetPosition;
+	private float distanceRadius = 0.1f;	//box collider
+	private float rotateSpeed = 5f;
 
-
-
-
-
+	private PheromoneGrid grid;
 
 	//navigation
 	private Vector3 nextPosition;
+	private float antSpeed = 5f;
+
+	private int limit = 5;
+	private int limiti;
 
 	// Use this for initialization
 	void Start () 
@@ -41,10 +48,13 @@ public class AntClass : MonoBehaviour
 		//wanderTarget = new Vector3(wanderRadius * Mathf.Cos(theta), wanderRadius * Mathf.Sin(theta), 0f);
 		wanderTarget = new Vector3(0,0,0);
 
+		limiti = Random.Range (0, limit);
+
 		transform.rotation = Quaternion.Euler (0f, 0f, Random.Range(0, 360));
 		//navigation
-
+		grid = GameObject.FindWithTag("PGrid").GetComponent<PheromoneGrid>();
 	
+
 	}
 	
 	// Update is called once per frame
@@ -125,9 +135,11 @@ public class AntClass : MonoBehaviour
 	//secretes a pheremone where the ant is currently standing
 	void secrete()
 	{
-		
-
-
+		if (limit >= limiti) {
+			grid.addPheromone (transform.position);
+			limiti = 0;
+		} else
+			limiti++;
 		
 	}
 
@@ -183,14 +195,6 @@ public class AntClass : MonoBehaviour
 
 	}
 
-	//wander variables for getSteering()
-	private float jitterScale = 1f;
-	private float wanderDistance = 2f;
-	private Vector3 wanderTarget;
-	//private Vector3 _previousPosition;
-	private Vector3 targetPosition;
-	private float distanceRadius = 0.1f;	//box collider
-	private float rotateSpeed = 5f;
 
 	public Vector3 steer ()
 	{
@@ -209,13 +213,7 @@ public class AntClass : MonoBehaviour
 
 			//move the target in front of the character
 			targetPosition = transform.position + transform.up * wanderDistance + wanderTarget;
-//			Debug.Log ((180/Mathf.PI)*Mathf.Atan2 (targetPosition.y, targetPosition.x)-90);
-//			transform.Rotate(new Vector3(0,0, (180/Mathf.PI)*Mathf.Atan2(targetPosition.y, targetPosition.x)-90));
 
-
-			//direction.Normalize ();
-
-			//transform.rotation = Quaternion.Euler (0f, 0f, angle - 90f);		
 		}
 			Vector3 direction = targetPosition - transform.position;
 			float angle = Mathf.Atan2 (direction.y, direction.x) * Mathf.Rad2Deg;
@@ -225,7 +223,6 @@ public class AntClass : MonoBehaviour
 		
 
 		Debug.DrawLine (transform.position, targetPosition);
-		//Debug.Log ("target position = " + targetPosition);
 
 		return targetPosition;
 	}

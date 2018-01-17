@@ -5,24 +5,58 @@ using UnityEngine;
 public class PheromoneNode : MonoBehaviour 
 {
 
-	public float concentration = 10f;
-	private float evaporationRate = 0.01f;
-	public bool exists;
+	public float concentration;
+	private float defaultConc = 10f;
+	private float maxConc = 50f;
+	private float evaporationRate = 3f;
+	private float defaultScale = 1f;
+	//public bool exists = true;
+	public int gridX;
+	public int gridY;
+	private PheromoneGrid pGrid;
+	public int ID;
 
-	// Use this for initialization
+	//private Transform pheromone;
+
 	void Start () 
 	{
-		
+		concentration = defaultConc;
 	}
 	
 	// Update is called once per frame
 	void Update () 
 	{
-		if (concentration > 0) {
-			exists = true;
+		if (concentration > 0f) {
+			if (concentration > maxConc)
+				concentration = maxConc;
+			
 			concentration -= evaporationRate * Time.deltaTime;
-			//Debug.Log (concentration);
-		} else
-			exists = false;
+			float scale = (concentration / defaultConc) * defaultScale; 
+
+			transform.localScale = new Vector3(scale,scale,scale);
+
+		} else {
+			Destroy(gameObject);
+		}
 	}
+
+	public void boostConc() {
+		concentration += defaultConc;
+	}
+
+	public void setXY(int x, int y)
+	{
+		gridX = x;
+		gridY = y;
+	}
+
+	public void setGrid(PheromoneGrid g)
+	{
+		pGrid = g;
+	}
+
+	public void setID(int id) {
+		ID = id;
+	}
+
 }
