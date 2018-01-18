@@ -7,8 +7,8 @@ public class PheromoneNode : MonoBehaviour
 
 	public float concentration;
 	private float defaultConc = 10f;
-	private float maxConc = 50f;
-	private float evaporationRate = 3f;
+	private float maxConc = 100f;
+	private float evaporationRate = 5f;
 	private float defaultScale = 1f;
 	//public bool exists = true;
 	public int gridX;
@@ -24,7 +24,7 @@ public class PheromoneNode : MonoBehaviour
 	}
 	
 	// Update is called once per frame
-	void Update () 
+	void FixedUpdate () 
 	{
 		if (concentration > 0f) {
 			if (concentration > maxConc)

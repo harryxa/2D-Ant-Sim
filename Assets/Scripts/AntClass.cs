@@ -23,21 +23,26 @@ public class AntClass : MonoBehaviour
 	//prioratisedDirection;			//the direction the ant wants to move in
 
 	//wander variables for getSteering()
-	private float jitterScale = 1f;
+	private float jitterScale = 0.5f;
 	private float wanderDistance = 2f;
-	private Vector3 wanderTarget;
 	private Vector3 targetPosition;
 	private float distanceRadius = 0.1f;	//box collider
 	private float rotateSpeed = 5f;
 
-	private PheromoneGrid grid;
+	private PheromoneGrid pGrid;
+	float worldHeight;
+	float worldWidth;
 
 	//navigation
 	private Vector3 nextPosition;
-	private float antSpeed = 5f;
+	private float antSpeed = 7f;
 
 	private int limit = 5;
 	private int limiti;
+
+	//smelling
+	private int smellRadius = 15;
+	private float smellStrength = 0.4f;
 
 	// Use this for initialization
 	void Start () 
@@ -46,24 +51,25 @@ public class AntClass : MonoBehaviour
 		//float theta = Random.value * 2 * Mathf.PI;
 		//create a vector to a target position on the wander circle
 		//wanderTarget = new Vector3(wanderRadius * Mathf.Cos(theta), wanderRadius * Mathf.Sin(theta), 0f);
-		wanderTarget = new Vector3(0,0,0);
+		//target = new Vector3(0,0,0);
 
 		limiti = Random.Range (0, limit);
 
 		transform.rotation = Quaternion.Euler (0f, 0f, Random.Range(0, 360));
 		//navigation
-		grid = GameObject.FindWithTag("PGrid").GetComponent<PheromoneGrid>();
-	
+		pGrid = GameObject.FindWithTag("PGrid").GetComponent<PheromoneGrid>();
+
+		worldHeight = pGrid.getWorldHeight () / 2;
+		worldWidth = pGrid.getWorldWidth () / 2;
 
 	}
 	
 	// Update is called once per frame
-	void Update () 
+	void FixedUpdate () 
 	{
 		boundingBox();
 		secrete ();
-		steer ();
-		setDestination ();
+		moveAnt ();
 	}
 
 	//add the ant to the map
@@ -127,8 +133,41 @@ public class AntClass : MonoBehaviour
 	}
 
 	//detects pheremones within range, populates pheremonesInRange
-	void Smell()
+	private Vector3 SmellDirection()
 	{
+		//detect pheromone nodes within a radius
+		//calculate mean concentration
+		Vector3 gridPos = pGrid.worldToGrid(transform.position);
+
+		int gridX = Mathf.RoundToInt(gridPos.x);
+		int gridY = Mathf.RoundToInt(gridPos.y);
+
+		Vector3 smellDirection = new Vector3 (0f,0f,0f);
+		for(int x = gridX - smellRadius; x <= gridX + smellRadius; x++)
+		{
+			for(int y = gridY - smellRadius; y <= gridY + smellRadius; y++)
+			{
+				
+				Vector3 pherDir = new Vector3 (x, y, 0) - new Vector3 (gridX, gridY,0);
+				Vector3 wrappedPherPos = pGrid.wrapGridCoord (new Vector3 (x, y, 0));
+
+				if (pherDir.magnitude <= smellRadius) 
+				{	
+					//Debug.Log (x + ","+ y + "  |  " + pherDir.x + ", " + pherDir.y + "  |  " + (int)wrappedPherPos.x + ", " + (int)wrappedPherPos.y);
+					if (pGrid.grid [(int)wrappedPherPos.x, (int)wrappedPherPos.y] != null) {
+						PheromoneNode n = pGrid.grid [(int)wrappedPherPos.x, (int)wrappedPherPos.y].GetComponent<PheromoneNode> ();
+						pherDir.Normalize ();
+						pherDir *= n.concentration;
+
+						smellDirection += pherDir;
+					}
+				}
+			}
+		}
+
+		smellDirection.Normalize ();
+		Debug.DrawLine (transform.position, transform.position+smellDirection, Color.cyan);
+		return smellStrength * smellDirection;
 
 	}
 
@@ -136,58 +175,78 @@ public class AntClass : MonoBehaviour
 	void secrete()
 	{
 		if (limit >= limiti) {
-			grid.addPheromone (transform.position);
+			pGrid.addPheromone (transform.position);
 			limiti = 0;
 		} else
 			limiti++;
 		
 	}
 
-	//decides how the ant moves e.g. follow a pheremone or wander randomly
-	void Wander()
-	{
-		
-	}
-
 	//moves the ant in the direction its facing
-	private void setDestination()
-	{						
-		nextPosition = steer();
-
+	private void moveAnt()
+	{			
+		//SetTarget (RandomTarget());
+		SetTarget(SmellDirection() + RandomTarget());
+		steer();
 		float step = antSpeed * Time.deltaTime;
-		transform.position = Vector3.MoveTowards (transform.position, nextPosition, step);
+		transform.position = Vector3.MoveTowards (transform.position, targetPosition, step);
 	}
 
+	public Vector3 RandomTarget() 
+	{
+		Vector3 target = new Vector3 (Random.Range (-1f, 1f) , Random.Range (-1f, 1f), 0f);
+
+		//make the Target fit on circle again
+		target.Normalize ();
+		target *= jitterScale;
+
+		return target;
+	}
+
+	//random target destination for the random ant movement
+	void SetTarget(Vector3 target)
+	{
+		if ((transform.position.y < targetPosition.y + distanceRadius && 
+			transform.position.y > targetPosition.y - distanceRadius && 
+			transform.position.x < targetPosition.x + distanceRadius && 
+			transform.position.x > targetPosition.x - distanceRadius) ) 
+		{
+
+//			//make the Target fit on circle again
+//			target.Normalize ();
+//			target *= jitterScale;
+
+			//move the target in front of the character
+			targetPosition = transform.position + transform.up * wanderDistance + target;
+		}
+	}
+
+	//bounds ants within area
 	private void boundingBox()
 	{
-		if (transform.position.x < -50) 
+		
+
+		if (transform.position.x < -worldWidth) 
 		{
-			transform.position = new Vector3(49, transform.position.y,0);
+			transform.position = new Vector3(worldWidth, transform.position.y,0);
 			targetPosition = transform.position;
 		}
-		else if (transform.position.x > 50) 
+		else if (transform.position.x > worldWidth) 
 		{
-			transform.position =  new Vector3(-49, transform.position.y,0);
+			transform.position =  new Vector3(-worldWidth, transform.position.y,0);
 			targetPosition = transform.position;
 		}
-		else if (transform.position.y < -50) 
+		else if (transform.position.y < -worldHeight) 
 		{
-			transform.position =  new Vector3(transform.position.x, 49,0);
+			transform.position =  new Vector3(transform.position.x, worldHeight,0);
 			targetPosition = transform.position;
 		}
-		else if (transform.position.y > 50) 
+		else if (transform.position.y > worldHeight) 
 		{
-			transform.position = new Vector3(transform.position.x, -49,0);
+			transform.position = new Vector3(transform.position.x, -worldHeight,0);
 			targetPosition = transform.position;
 		}
 	}
-
-//	void faceDirection()
-//	{
-//		Quaternion rot = new Quaternion ();
-//		rot.SetFromToRotation (transform.position, nextPosition);
-//		transform.rotation = rot;
-//	}
 
 	//kill the ant and remove it from the simulation.
 	void Die()
@@ -195,36 +254,16 @@ public class AntClass : MonoBehaviour
 
 	}
 
-
-	public Vector3 steer ()
+	//changes the direction that the ant is facing 
+	private void steer ()
 	{
-		if ((transform.position.y < targetPosition.y + distanceRadius && 
-			transform.position.y > targetPosition.y - distanceRadius && 
-			transform.position.x < targetPosition.x + distanceRadius && 
-			transform.position.x > targetPosition.x - distanceRadius) ) {//|| targetPosition.y == 0f && targetPosition.x == 0f 
-
-
-			//add a small random vector to the target's position
-			wanderTarget = new Vector3 (Random.Range (-1f, 1f) , Random.Range (-1f, 1f), 0f);
-
-			//make the wanderTarget fit on the wander circle again
-			wanderTarget.Normalize ();
-			wanderTarget *= jitterScale;
-
-			//move the target in front of the character
-			targetPosition = transform.position + transform.up * wanderDistance + wanderTarget;
-
-		}
-			Vector3 direction = targetPosition - transform.position;
-			float angle = Mathf.Atan2 (direction.y, direction.x) * Mathf.Rad2Deg;
-			transform.rotation = Quaternion.Lerp(transform.rotation, 
-			Quaternion.Euler(0f, 0f, angle - 90f), 
-			rotateSpeed*Time.deltaTime);
-		
+		Vector3 direction = targetPosition - transform.position;
+		float angle = Mathf.Atan2 (direction.y, direction.x) * Mathf.Rad2Deg;
+		transform.rotation = Quaternion.Lerp(transform.rotation, 
+		Quaternion.Euler(0f, 0f, angle - 90f), 
+		rotateSpeed*Time.deltaTime);	
 
 		Debug.DrawLine (transform.position, targetPosition);
-
-		return targetPosition;
 	}
 
 }
