@@ -9,7 +9,7 @@ public class PheromoneNode : MonoBehaviour
 	private float defaultConc = 10f;
 	private float maxConc = 100f;
 	private float evaporationRate = 5f;
-	private float defaultScale = 1f;
+	private float defaultScale = 0.5f;
 	//public bool exists = true;
 	public int gridX;
 	public int gridY;

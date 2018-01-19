@@ -41,8 +41,8 @@ public class AntClass : MonoBehaviour
 	private int limiti;
 
 	//smelling
-	private int smellRadius = 15;
-	private float smellStrength = 0.4f;
+	private int smellRadius = 10;
+	private float smellStrength = 0.6f;
 
 	// Use this for initialization
 	void Start () 
