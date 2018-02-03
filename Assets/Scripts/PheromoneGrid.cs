@@ -9,17 +9,18 @@ public class PheromoneGrid : MonoBehaviour
 	private float worldHeight = 100;
 	private int gridHeight = 100;
 	private int gridWidth = 100;
-	private int IDCounter = 0;
+
 
 	public Transform[,] grid;
 	public Transform pheromone;
+
+	public Transform genericFood;
 
 	// Use this for initialization
 	void Start () 
 	{
 		//grid can range from 0 to 10, so + 1
 		grid = new Transform[gridWidth + 1, gridHeight + 1];
-
 	}
 	
 	// Update is called once per frame
@@ -28,24 +29,47 @@ public class PheromoneGrid : MonoBehaviour
 		
 	}
 
+	//TODO: add various types of pheromones
 	public void addPheromone(Vector3 worldPos)
 	{
 		Vector3 gridPos = worldToGrid (worldPos);
-		//TODO: add concentration to current node rather than recreate (when a node exists here already)
 		gridPos.x = Mathf.RoundToInt(gridPos.x);
 		gridPos.y = Mathf.RoundToInt(gridPos.y);
 		int x = (int)gridPos.x;
 		int y = (int)gridPos.y;
 
-		if(grid[x, y] != null)
-			grid[x,y].GetComponent<PheromoneNode>().boostConc();
-		else {
+		//boost concentration of existing pheromone
+		if (grid [x, y] != null) 
+		{
+			grid [x, y].GetComponent<PheromoneNode> ().boostConc ();
+		}
+		//instantiate new pheromone node
+		else 
+		{
 			grid [x, y] = Instantiate(pheromone, gridToWorld(gridPos), Quaternion.identity);
 			PheromoneNode node = grid [x, y].GetComponent<PheromoneNode> ();
 			node.setXY (x, y);
-			node.setGrid (this);
-			node.setID (IDCounter++);
+			//node.setGrid (this);
 		}
+	}
+
+	public void addFood(Vector3 worldPos)
+	{
+		
+		Vector3 gridPos = worldToGrid (worldPos);
+		gridPos.x = Mathf.RoundToInt(gridPos.x);
+		gridPos.y = Mathf.RoundToInt(gridPos.y);
+		int x = (int)gridPos.x;
+		int y = (int)gridPos.y;
+
+		Debug.Log (x + ", " + y);
+
+		grid [x, y] = Instantiate (genericFood, gridToWorld(gridPos), Quaternion.identity);
+		Debug.Log ("sam");
+
+		Food node = grid [x, y].GetComponent<Food> ();
+		node.setXY (x, y);
+
 	}
 
 	public Vector3 gridToWorld(Vector3 gridPos) 
@@ -89,5 +113,4 @@ public class PheromoneGrid : MonoBehaviour
 	{
 		return worldHeight;
 	}
-
 }

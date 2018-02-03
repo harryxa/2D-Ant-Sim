@@ -17,25 +17,28 @@ public class AntClass : MonoBehaviour
 	private float healthRate;		//rate at which health decreases
 	private bool alive = true;				//determines whether the ant is alive or not
 	//public int goal;				//the current goal the ant is trying to complete
-	//public Vector3 target;			//the target coord of an item e.g. food
+	//public Vector3 target;		//the target coord of an item e.g. food
 	List<int> itemsInView;			//an array of items within view e.g. ants or food
 	List<int> pheremonesInRange;	//an array of pheremones within range
 	//prioratisedDirection;			//the direction the ant wants to move in
 
-	//wander variables for getSteering()
+	//wander variables for random target
 	private float jitterScale = 0.5f;
 	private float wanderDistance = 2f;
 	private Vector3 targetPosition;
 	private float distanceRadius = 0.1f;	//box collider
 	private float rotateSpeed = 5f;
 
+
 	private PheromoneGrid pGrid;
+
+	//bounding box floats
 	float worldHeight;
 	float worldWidth;
 
 	//navigation
 	private Vector3 nextPosition;
-	private float antSpeed = 7f;
+	public float antSpeed = 7f;
 
 	private int limit = 5;
 	private int limiti;
@@ -65,11 +68,12 @@ public class AntClass : MonoBehaviour
 	}
 	
 	// Update is called once per frame
-	void FixedUpdate () 
+	void Update () 
 	{
 		boundingBox();
 		secrete ();
 		moveAnt ();
+
 	}
 
 	//add the ant to the map
@@ -109,7 +113,7 @@ public class AntClass : MonoBehaviour
 	}
 
 	//pick a food item to target
-	void FindFoodTarget()
+	void FindFood(Vector3 foodPosition)
 	{
 
 	}
@@ -123,16 +127,21 @@ public class AntClass : MonoBehaviour
 	//decide how to use a piece of food e.g. eat or carry
 	void UseFood()
 	{
-
+		
 	}
 
 	//scan visable surroundings for items of interest, populates itemsInView
 	void Search()
 	{
-
+		
 	}
 
-	//detects pheremones within range, populates pheremonesInRange
+	void OnTriggerEnter(Collider food)
+	{
+		Debug.Log("Collision detected");
+	}
+
+	//detects pheremones within range
 	private Vector3 SmellDirection()
 	{
 		//detect pheromone nodes within a radius
@@ -155,7 +164,8 @@ public class AntClass : MonoBehaviour
 				{	
 					//Debug.Log (x + ","+ y + "  |  " + pherDir.x + ", " + pherDir.y + "  |  " + (int)wrappedPherPos.x + ", " + (int)wrappedPherPos.y);
 					if (pGrid.grid [(int)wrappedPherPos.x, (int)wrappedPherPos.y] != null) {
-						PheromoneNode n = pGrid.grid [(int)wrappedPherPos.x, (int)wrappedPherPos.y].GetComponent<PheromoneNode> ();
+						PheromoneNode n = pGrid.grid [(int)wrappedPherPos.x, 
+													  (int)wrappedPherPos.y].GetComponent<PheromoneNode> ();
 						pherDir.Normalize ();
 						pherDir *= n.concentration;
 
@@ -168,9 +178,10 @@ public class AntClass : MonoBehaviour
 		smellDirection.Normalize ();
 		Debug.DrawLine (transform.position, transform.position+smellDirection, Color.cyan);
 		return smellStrength * smellDirection;
-
 	}
 
+
+	//TODO: various pheremones sevreted deonding on the situation
 	//secretes a pheremone where the ant is currently standing
 	void secrete()
 	{
@@ -182,15 +193,19 @@ public class AntClass : MonoBehaviour
 		
 	}
 
+	//TODO: ants follow different pheromones depending on the situation
 	//moves the ant in the direction its facing
 	private void moveAnt()
 	{			
+		//SetTarget(SmellDirection());
 		//SetTarget (RandomTarget());
 		SetTarget(SmellDirection() + RandomTarget());
+		//SetTarget(new Vector3(0,0,0));
 		steer();
 		float step = antSpeed * Time.deltaTime;
 		transform.position = Vector3.MoveTowards (transform.position, targetPosition, step);
 	}
+
 
 	public Vector3 RandomTarget() 
 	{
@@ -218,6 +233,7 @@ public class AntClass : MonoBehaviour
 
 			//move the target in front of the character
 			targetPosition = transform.position + transform.up * wanderDistance + target;
+
 		}
 	}
 
@@ -260,8 +276,8 @@ public class AntClass : MonoBehaviour
 		Vector3 direction = targetPosition - transform.position;
 		float angle = Mathf.Atan2 (direction.y, direction.x) * Mathf.Rad2Deg;
 		transform.rotation = Quaternion.Lerp(transform.rotation, 
-		Quaternion.Euler(0f, 0f, angle - 90f), 
-		rotateSpeed*Time.deltaTime);	
+							 Quaternion.Euler(0f, 0f, angle - 90f), 
+							 rotateSpeed*Time.deltaTime);	
 
 		Debug.DrawLine (transform.position, targetPosition);
 	}

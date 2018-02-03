@@ -8,25 +8,24 @@ public class PheromoneNode : MonoBehaviour
 	public float concentration;
 	private float defaultConc = 10f;
 	private float maxConc = 100f;
-	private float evaporationRate = 5f;
+	protected float evaporationRate = 5f;
 	private float defaultScale = 0.5f;
 	//public bool exists = true;
 	public int gridX;
 	public int gridY;
-	private PheromoneGrid pGrid;
-	public int ID;
+	//private PheromoneGrid pGrid;
 
-	//private Transform pheromone;
+
 
 	void Start () 
 	{
 		concentration = defaultConc;
 	}
 	
-	// Update is called once per frame
 	void FixedUpdate () 
 	{
-		if (concentration > 0f) {
+		if (concentration > 0f) 
+		{
 			if (concentration > maxConc)
 				concentration = maxConc;
 			
@@ -35,12 +34,15 @@ public class PheromoneNode : MonoBehaviour
 
 			transform.localScale = new Vector3(scale,scale,scale);
 
-		} else {
+		} 
+		else 
+		{
 			Destroy(gameObject);
 		}
 	}
 
-	public void boostConc() {
+	public void boostConc() 
+	{
 		concentration += defaultConc;
 	}
 
@@ -49,14 +51,4 @@ public class PheromoneNode : MonoBehaviour
 		gridX = x;
 		gridY = y;
 	}
-
-	public void setGrid(PheromoneGrid g)
-	{
-		pGrid = g;
-	}
-
-	public void setID(int id) {
-		ID = id;
-	}
-
 }
