@@ -13,7 +13,6 @@ public class PheromoneGrid : MonoBehaviour
 
 	public Transform[,] grid;
 	public Transform pheromone;
-
 	public Transform genericFood;
 
 	// Use this for initialization
@@ -46,10 +45,11 @@ public class PheromoneGrid : MonoBehaviour
 		//instantiate new pheromone node
 		else 
 		{
+			//instantiate pheromone
 			grid [x, y] = Instantiate(pheromone, gridToWorld(gridPos), Quaternion.identity);
+
 			PheromoneNode node = grid [x, y].GetComponent<PheromoneNode> ();
 			node.setXY (x, y);
-			//node.setGrid (this);
 		}
 	}
 
@@ -65,7 +65,6 @@ public class PheromoneGrid : MonoBehaviour
 		Debug.Log (x + ", " + y);
 
 		grid [x, y] = Instantiate (genericFood, gridToWorld(gridPos), Quaternion.identity);
-		Debug.Log ("sam");
 
 		Food node = grid [x, y].GetComponent<Food> ();
 		node.setXY (x, y);

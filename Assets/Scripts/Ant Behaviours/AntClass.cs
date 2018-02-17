@@ -6,21 +6,18 @@ using UnityEngine.AI;
 
 public class AntClass : MonoBehaviour 
 {
+	//debug stuff
+	public bool setSecrete = true;
+
+
 	//basic properties of an ant
 
-	//species;						//species of ant (not sure if useful)
-	public int ID;					//unique identifier
-	//colony;						//which colony the ant is a member of
-	//nest;							//where the ant was born
 	private float health;			//the amount of health the ant has
 	private float hungerThreshold;	//the threshold below which the ant will be hungry
 	private float healthRate;		//rate at which health decreases
-	private bool alive = true;				//determines whether the ant is alive or not
-	//public int goal;				//the current goal the ant is trying to complete
-	//public Vector3 target;		//the target coord of an item e.g. food
+	private bool alive = true;		//determines whether the ant is alive or not
 	List<int> itemsInView;			//an array of items within view e.g. ants or food
 	List<int> pheremonesInRange;	//an array of pheremones within range
-	//prioratisedDirection;			//the direction the ant wants to move in
 
 	//wander variables for random target
 	private float jitterScale = 0.5f;
@@ -44,133 +41,81 @@ public class AntClass : MonoBehaviour
 	private int limiti;
 
 	//smelling
-	private int smellRadius = 10;
-	private float smellStrength = 0.6f;
+	public int smellRadius = 10;
+	public float smellStrength = 0.6f;
 
 	// Use this for initialization
 	void Start () 
-	{		
-		//stuff for the wander behavior for getSteering()
-		//float theta = Random.value * 2 * Mathf.PI;
-		//create a vector to a target position on the wander circle
-		//wanderTarget = new Vector3(wanderRadius * Mathf.Cos(theta), wanderRadius * Mathf.Sin(theta), 0f);
-		//target = new Vector3(0,0,0);
-
+	{
 		limiti = Random.Range (0, limit);
-
 		transform.rotation = Quaternion.Euler (0f, 0f, Random.Range(0, 360));
-		//navigation
+
+		//find the pheromone grid, where pheromone data is stored.
 		pGrid = GameObject.FindWithTag("PGrid").GetComponent<PheromoneGrid>();
 
 		worldHeight = pGrid.getWorldHeight () / 2;
 		worldWidth = pGrid.getWorldWidth () / 2;
 
+		//set ants initial target vector to its own position, rather than 0,0,0
+		targetPosition = new Vector3 (transform.position.x, transform.position.y, 0f);
 	}
 	
 	// Update is called once per frame
 	void Update () 
 	{
 		boundingBox();
-		secrete ();
+
+		if (setSecrete == true)
+			secrete ();
+		
 		moveAnt ();
-
 	}
 
-	//add the ant to the map
-	void AddToMap()
-	{
-		
-	}
-
-	//remove the ant from the map
-	void RemoveFromMap()
-	{
-		
-	}
-
-	//determine whether the ant is hungry
-	void IsHungry()
-	{
-
-	}
-
-	//take a single peice of food if the ant is standing near it
-	void TakeFood()
-	{
-
-	}
-
-	//determines if the ant is ontop of the nest (for dropping off food etc.)
-	void AtNest()
-	{
-
-	}
-
-	//determines whether the ants can see the nest
-	void SeeNest()
-	{
-
-	}
-
-	//pick a food item to target
-	void FindFood(Vector3 foodPosition)
-	{
-
-	}
-
-	//move towards a piece of food and use the item of food
-	void GetFood()
-	{
-
-	}
-
-	//decide how to use a piece of food e.g. eat or carry
-	void UseFood()
-	{
-		
-	}
-
-	//scan visable surroundings for items of interest, populates itemsInView
-	void Search()
-	{
-		
-	}
-
-	void OnTriggerEnter(Collider food)
-	{
-		Debug.Log("Collision detected");
-	}
-
-	//detects pheremones within range
+	//detects pheremones within range of ant
 	private Vector3 SmellDirection()
 	{
-		//detect pheromone nodes within a radius
-		//calculate mean concentration
-		Vector3 gridPos = pGrid.worldToGrid(transform.position);
+		//gets the ants location on the grid
+		Vector3 antGridPos = pGrid.worldToGrid(transform.position);
+		int gridX = Mathf.RoundToInt(antGridPos.x);
+		int gridY = Mathf.RoundToInt(antGridPos.y);
 
-		int gridX = Mathf.RoundToInt(gridPos.x);
-		int gridY = Mathf.RoundToInt(gridPos.y);
+		Vector3 smellDirection = new Vector3 (antGridPos.x, antGridPos.y,0f);
 
-		Vector3 smellDirection = new Vector3 (0f,0f,0f);
+
+		//loops through grid in square shape around ant
 		for(int x = gridX - smellRadius; x <= gridX + smellRadius; x++)
 		{
 			for(int y = gridY - smellRadius; y <= gridY + smellRadius; y++)
-			{
-				
-				Vector3 pherDir = new Vector3 (x, y, 0) - new Vector3 (gridX, gridY,0);
+			{	
+				//creates a vector from the ant to the node on the grid
+				Vector3 pherDir = new Vector3 (x, y, 0) - new Vector3 (gridX, gridY,0);	
+				Vector3 foodDir = new Vector3 (x, y, 0) - new Vector3 (gridX, gridY,0);	
 				Vector3 wrappedPherPos = pGrid.wrapGridCoord (new Vector3 (x, y, 0));
 
+				//limits the search to a radius around the ant, rather than a square
 				if (pherDir.magnitude <= smellRadius) 
 				{	
-					//Debug.Log (x + ","+ y + "  |  " + pherDir.x + ", " + pherDir.y + "  |  " + (int)wrappedPherPos.x + ", " + (int)wrappedPherPos.y);
-					if (pGrid.grid [(int)wrappedPherPos.x, (int)wrappedPherPos.y] != null) {
+					if (pGrid.grid [(int)wrappedPherPos.x, (int)wrappedPherPos.y] != null) 
+					{
 						PheromoneNode n = pGrid.grid [(int)wrappedPherPos.x, 
 													  (int)wrappedPherPos.y].GetComponent<PheromoneNode> ();
+						
+						Food f = pGrid.grid [(int)wrappedPherPos.x, (int)wrappedPherPos.y].GetComponent<Food> ();
+						
 						pherDir.Normalize ();
+						foodDir.Normalize ();
+
 						pherDir *= n.concentration;
 
-						smellDirection += pherDir;
-					}
+						if (f == null)
+							smellDirection += pherDir;
+
+						else if (f != null) 
+						{			
+							foodDir *= f.concentration;
+							smellDirection += foodDir;
+						}
+					}	
 				}
 			}
 		}
@@ -183,15 +128,18 @@ public class AntClass : MonoBehaviour
 
 	//TODO: various pheremones sevreted deonding on the situation
 	//secretes a pheremone where the ant is currently standing
-	void secrete()
+	void secrete ()
 	{
 		if (limit >= limiti) {
 			pGrid.addPheromone (transform.position);
 			limiti = 0;
 		} else
-			limiti++;
-		
+			limiti++;		
 	}
+
+
+
+	//TODO fix movement, trying to sort smeel direction to only get called when ants are at taregt location
 
 	//TODO: ants follow different pheromones depending on the situation
 	//moves the ant in the direction its facing
@@ -199,11 +147,17 @@ public class AntClass : MonoBehaviour
 	{			
 		//SetTarget(SmellDirection());
 		//SetTarget (RandomTarget());
-		SetTarget(SmellDirection() + RandomTarget());
-		//SetTarget(new Vector3(0,0,0));
-		steer();
-		float step = antSpeed * Time.deltaTime;
-		transform.position = Vector3.MoveTowards (transform.position, targetPosition, step);
+
+	
+			SetTarget (SmellDirection () + RandomTarget ());
+
+			steer ();
+			float step = antSpeed * Time.deltaTime;
+			transform.position = Vector3.MoveTowards (transform.position, targetPosition, step);
+
+	
+
+	
 	}
 
 
@@ -218,7 +172,7 @@ public class AntClass : MonoBehaviour
 		return target;
 	}
 
-	//random target destination for the random ant movement
+	//sets ants target vector
 	void SetTarget(Vector3 target)
 	{
 		if ((transform.position.y < targetPosition.y + distanceRadius && 
@@ -226,22 +180,14 @@ public class AntClass : MonoBehaviour
 			transform.position.x < targetPosition.x + distanceRadius && 
 			transform.position.x > targetPosition.x - distanceRadius) ) 
 		{
-
-//			//make the Target fit on circle again
-//			target.Normalize ();
-//			target *= jitterScale;
-
 			//move the target in front of the character
 			targetPosition = transform.position + transform.up * wanderDistance + target;
-
 		}
 	}
 
 	//bounds ants within area
 	private void boundingBox()
 	{
-		
-
 		if (transform.position.x < -worldWidth) 
 		{
 			transform.position = new Vector3(worldWidth, transform.position.y,0);
@@ -264,12 +210,6 @@ public class AntClass : MonoBehaviour
 		}
 	}
 
-	//kill the ant and remove it from the simulation.
-	void Die()
-	{
-
-	}
-
 	//changes the direction that the ant is facing 
 	private void steer ()
 	{
@@ -281,5 +221,6 @@ public class AntClass : MonoBehaviour
 
 		Debug.DrawLine (transform.position, targetPosition);
 	}
+
 
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 public class FoodManager : MonoBehaviour {
 
 	private PheromoneGrid pGrid;
-	int i = 0;
+	int i = 1;
 	// Use this for initialization
 	void Start () 
 	{

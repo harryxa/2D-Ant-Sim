@@ -5,16 +5,26 @@ using UnityEngine;
 public class Food : PheromoneNode
 {
 
-	private float quantity = 10;
-	public float smellFactor = 2;
+	private float quantity = 100f;
+	public float smellFactor = 2f;
 
-	void Awake()
-	{
+	private float startingConcentration;
+
+	void Start()
+	{		
 		concentration = quantity * smellFactor;
+		startingConcentration = concentration;
+		defaultScale = 2f;
 	}
 
 	void FixedUpdate()
 	{
+
+
+		float scale = (concentration / startingConcentration) * defaultScale;
+		transform.localScale = new Vector3 (scale, scale, scale);
+
+
 		if (quantity == 0) {
 			Destroy (gameObject);
 		}
