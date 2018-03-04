@@ -9,7 +9,8 @@ public class AntClass : MonoBehaviour
 	//debug stuff
 	public bool setSecrete = true;
 
-
+	public enum AntState {WANDERING, CARRYING, GATHERING};
+	public AntState state;
 	//basic properties of an ant
 
 	private float health;
@@ -29,7 +30,7 @@ public class AntClass : MonoBehaviour
 
 	//wander variables for random target
 	private float jitterScale = 0.5f;
-	private float wanderDistance = 2f;
+	private float wanderDistance =1.5f;
 	private Vector3 targetPosition;
 	private float distanceRadius = 0.1f;
 	//box collider
@@ -82,6 +83,10 @@ public class AntClass : MonoBehaviour
 		//set ants initial target vector to its own position, rather than 0,0,0
 		targetPosition = new Vector3 (transform.position.x, transform.position.y, 0f);
 		ResetTargetCheck ();
+		if (Random.value > 0.8f)
+			state = AntState.WANDERING;
+		else
+			state = AntState.CARRYING;
 	}
 
 	// Update is called once per frame
@@ -92,7 +97,7 @@ public class AntClass : MonoBehaviour
 		if (setSecrete == true)
 			secrete ();
 		if (walked)
-			MoveAnt ();
+			Move();
 		else {
 			//First movement as random to prevent pheremone issues
 			MoveAntRand ();
@@ -122,18 +127,23 @@ public class AntClass : MonoBehaviour
 
 
 				//limits the search to a radius around the ant, rather than a square
-				if (pherPos.x >= 0 && pherPos.x < worldWidth &&
-					pherPos.y >= 0 && pherPos.y < worldHeight &&
+				if (x >= 0 && x < worldWidth &&
+					y >= 0 && y < worldHeight &&
 					pherDir.magnitude <= smellRadius) 
 				{	
-					if (pGrid.grid [(int)pherPos.x, (int)pherPos.y] != null) {
-						PheromoneNode n = pGrid.grid [(int)pherPos.x, 
-							(int)pherPos.y].GetComponent<PheromoneNode> ();
+					if (pGrid.grid [x, y] != null) {
+						PheromoneNode n = pGrid.grid [x, y].GetComponent<PheromoneNode> ();
 
-						Food f = pGrid.grid [(int)pherPos.x, (int)pherPos.y].GetComponent<Food> ();
-						if (f != null) {			
-							return antGridPos;
-							//return pherPos - ;
+						Food f = pGrid.grid [x, y].GetComponent<Food> ();
+
+						if (f != null) {		
+							smellDirection = pherDir;
+							//smellDirection = pGrid.gridToWorld (smellDirection);
+							smellDirection.Normalize ();
+
+							Debug.DrawLine (transform.position, transform.position + smellDirection, Color.yellow);
+							state = AntState.CARRYING;
+							return smellDirection;
 						} // effectively else (as this returns)
 
 
@@ -145,6 +155,7 @@ public class AntClass : MonoBehaviour
 			}
 		}
 
+		//smellDirection = pGrid.gridToWorld (smellDirection);
 		smellDirection.Normalize ();
 		Debug.DrawLine (transform.position, transform.position + smellDirection, Color.cyan);
 		return smellStrength * smellDirection;
@@ -162,7 +173,29 @@ public class AntClass : MonoBehaviour
 			limiti++;		
 	}
 
+	private void Move()
+	{
+		switch (state) 
+		{
+		case AntState.WANDERING:
+			SetTarget (RandomTarget ());
+			break;
+		case AntState.CARRYING:
+			SetTarget (SmellDirection ());
+			break;
+		case AntState.GATHERING:
+			SetTarget (SmellDirection () + RandomTarget ());
+			break;
+		}
 
+
+
+		FixTarget ();
+
+		steer ();
+		float step = antSpeed * Time.deltaTime;
+		transform.position = Vector3.MoveTowards (transform.position, targetPosition, step);
+	}
 
 	//TODO fix movement, trying to sort smeel direction to only get called when ants are at taregt location
 
@@ -277,10 +310,11 @@ public class AntClass : MonoBehaviour
 	//sets ants target vector
 	void SetTarget (Vector3 target)
 	{
+		//sets new target position once old target is reached 
 		if ((transform.position.y < targetPosition.y + distanceRadius &&
-			transform.position.y > targetPosition.y - distanceRadius &&
-			transform.position.x < targetPosition.x + distanceRadius &&
-			transform.position.x > targetPosition.x - distanceRadius)) {
+		    transform.position.y > targetPosition.y - distanceRadius &&
+		    transform.position.x < targetPosition.x + distanceRadius &&
+		    transform.position.x > targetPosition.x - distanceRadius)) {
 			//move the target in front of the character
 			targetPosition = transform.position + transform.up * wanderDistance + target;
 		}

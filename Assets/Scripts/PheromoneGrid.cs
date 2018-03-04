@@ -38,14 +38,7 @@ public class PheromoneGrid : MonoBehaviour
 		int y = (int)gridPos.y;
 
 
-
-		//boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
-		if (grid [x, y] != null && grid[x,y].GetComponent<PheromoneNode>().GetType() == (new PheromoneNode()).GetType())
-		{
-			grid [x, y].GetComponent<PheromoneNode> ().boostConc ();
-		}
-		//instantiate new pheromone node
-		else 
+		if (grid[x, y] == null)
 		{
 			//instantiate pheromone
 			grid [x, y] = Instantiate(pheromone, gridToWorld(gridPos), Quaternion.identity);
@@ -53,6 +46,13 @@ public class PheromoneGrid : MonoBehaviour
 			PheromoneNode node = grid [x, y].GetComponent<PheromoneNode> ();
 			node.setXY (x, y);
 		}
+		//boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
+		else if (grid[x,y].GetComponent<PheromoneNode>().GetType() == (new PheromoneNode()).GetType())
+		{
+			grid [x, y].GetComponent<PheromoneNode> ().boostConc ();
+		}
+		//instantiate new pheromone node
+
 	}
 
 	public void addFood(Vector3 worldPos)

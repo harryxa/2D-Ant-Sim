@@ -5,7 +5,7 @@ using UnityEngine;
 public class Food : PheromoneNode
 {
 
-	private float quantity = 100f;
+	private float quantity = 100000f;
 	public float smellFactor = 2f;
 
 	private float startingConcentration;

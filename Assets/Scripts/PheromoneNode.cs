@@ -6,7 +6,7 @@ public class PheromoneNode : MonoBehaviour
 {
 
 	public float concentration;
-	public float defaultConc = 10f;
+	public float defaultConc = 20f;
 	private float maxConc = 100f;
 	protected float evaporationRate = 5f;
 	public float defaultScale = 0.5f;
