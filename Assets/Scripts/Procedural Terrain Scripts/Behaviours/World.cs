@@ -12,12 +12,16 @@ public class World : MonoBehaviour
 
 	//randomising map variables
 	public bool randomiseMap = false;
+	public bool squareMap = false;
 	public bool randomSeed;
 
 	//determines size of mesh
 	public int width;
 	public int height;
 	public int chunkSize = 50;
+
+	public int halfWidth;
+	public int halfHeight;
 
 	//Mesh variables
 	MeshData data;
@@ -68,6 +72,9 @@ public class World : MonoBehaviour
 		grassStartHeight = dirtEndHeight;
 		cobbleStartHeight = grassEndHeight;
 
+		halfWidth = width / 2;
+		halfHeight = height / 2;
+
 	}
 
 	void Start ()
@@ -82,9 +89,15 @@ public class World : MonoBehaviour
 
 	void Update ()
 	{
-		if (randomiseMap == true) {
+		if (randomiseMap == true) 
+		{
 			RandomizeMap ();
 			randomiseMap = false;
+		}
+		if (squareMap == true) 
+		{
+			SquareMap ();
+			squareMap = false;
 		}
 	}
 
@@ -100,8 +113,8 @@ public class World : MonoBehaviour
 			for (int j = 0; j < height; j++) {				
 				//initalise each tile in tiles array
 				tiles [i, j] = SetTileAtHeight (noiseValues [i, j]);
-				tiles [i, j].X = i;
-				tiles [i, j].Y = j;
+				tiles [i, j].X = i - halfWidth;
+				tiles [i, j].Y = j - halfHeight;
 			}
 		}
 	}
@@ -235,6 +248,8 @@ public class World : MonoBehaviour
 			}
 		}
 		meshGOvalue++;
+
+		meshGO.transform.position = new Vector3 (-halfWidth, -halfHeight, 0);
 	}
 
 	//MOUNTAIN TILES
@@ -314,6 +329,9 @@ public class World : MonoBehaviour
 		}
 
 		meshGOMountainvalue++;
+
+		meshGO.transform.position = new Vector3 (-halfWidth, -halfHeight, 0);
+
 	}
 
 	//redraws chunk dependant on the chunk number
@@ -362,10 +380,44 @@ public class World : MonoBehaviour
 
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
+				//cleares mountains before resetting them
 				tiles [i, j].wall = Tile.Wall.Empty;
 				//initalise each tile in tiles array
 				tiles [i, j] = SetTileAtHeight (noiseValues [i, j], tiles [i, j]);  
 
+			}
+		}	
+		for (int i = 0; i < meshGOvalue; i++) { 
+			OnTileTypeChange (i);
+		}
+
+		OnMountainChange ();
+	}
+
+	void SquareMap ()
+	{		
+		int value = Random.Range (-10000, 10000);
+		noise.Seed = value;
+		noise.Frequency = frequency;
+		noise.Amplitude = amplitude;
+		noise.Lacunarity = lacunarity;
+		noise.Persistance = persistance;
+		noise.Octaves = octaves;
+
+		float[,] noiseValues = noise.GetNoiseValues (width, height);
+
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) 
+			{
+				//cleares mountains before resetting them
+				tiles [i, j].wall = Tile.Wall.Empty;
+				//initalise each tile in tiles array
+				tiles [i, j] = SetTileAtHeight (grassEndHeight, tiles [i, j]);
+
+				tiles [i, 0] = SetTileAtHeight (grassStartHeight, tiles [i, 0]);  
+				tiles [i, height-1] = SetTileAtHeight (grassStartHeight, tiles [i, height-1]); 
+				tiles [0, j] = SetTileAtHeight (grassStartHeight, tiles [0, j]); 
+				tiles [width -1, j] = SetTileAtHeight (grassStartHeight, tiles [width -1, j]);  
 			}
 		}	
 		for (int i = 0; i < meshGOvalue; i++) { 

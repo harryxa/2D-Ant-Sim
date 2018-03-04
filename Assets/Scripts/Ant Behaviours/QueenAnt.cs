@@ -25,7 +25,7 @@ public class QueenAnt : AntClass {
 	void SpawnAnts(int n)
 	{
 		for (int i = 0; i < n; i++) {
-			Instantiate(workerAnt, transform.position, Quaternion.identity);
+			Instantiate(workerAnt, transform.position, Quaternion.Euler(0,0, Random.value *360) );
 		}
 	}
 }

@@ -25,13 +25,18 @@ public class MouseManager : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
+
+
 		Vector3 currMousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+		currMousePos = new Vector3 (currMousePos.x + World.instance.halfWidth, currMousePos.y + World.instance.halfHeight, currMousePos.z);
 
 		//update cursor position
 		Tile tileUnderMouse = GetTileAtWorldCoord (currMousePos);
 		if (tileUnderMouse != null) {
 			cursor.SetActive (true);
 			Vector3 cursorPosition = new Vector3 (tileUnderMouse.X + 0.5f, tileUnderMouse.Y + 0.5f, 0);
+			cursorPosition = new Vector3 (cursorPosition.x, cursorPosition.y, cursorPosition.z);
+
 			cursor.transform.position = cursorPosition;
 		} else {
 			cursor.SetActive (false);
@@ -86,8 +91,7 @@ public class MouseManager : MonoBehaviour
 						}
 
 						if (t.chunkNumber != previousTile.chunkNumber)
-							World.instance.OnTileTypeChange (t.chunkNumber);
-						
+							World.instance.OnTileTypeChange (t.chunkNumber);						
 
 						previousTile = t;
 					}
@@ -109,6 +113,8 @@ public class MouseManager : MonoBehaviour
 		Camera.main.orthographicSize = fov;
 
 		lastMousePosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+		lastMousePosition = new Vector3 (lastMousePosition.x + World.instance.halfWidth, lastMousePosition.y + World.instance.halfHeight, lastMousePosition.z);
+
 	}
 
 

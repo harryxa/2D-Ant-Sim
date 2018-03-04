@@ -37,8 +37,10 @@ public class PheromoneGrid : MonoBehaviour
 		int x = (int)gridPos.x;
 		int y = (int)gridPos.y;
 
-		//boost concentration of existing pheromone
-		if (grid [x, y] != null) 
+
+
+		//boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
+		if (grid [x, y] != null && grid[x,y].GetComponent<PheromoneNode>().GetType() == (new PheromoneNode()).GetType())
 		{
 			grid [x, y].GetComponent<PheromoneNode> ().boostConc ();
 		}
