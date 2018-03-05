@@ -19,14 +19,12 @@ public class Food : PheromoneNode
 
 	void FixedUpdate()
 	{
-
-
-		float scale = (concentration / startingConcentration) * defaultScale;
-		transform.localScale = new Vector3 (scale, scale, scale);
-
-
-		if (quantity == 0) {
-			Destroy (gameObject);
-		}
+//		float scale = (concentration / startingConcentration) * defaultScale;
+//		transform.localScale = new Vector3 (scale, scale, scale);
+//
+//
+//		if (quantity == 0) {
+//			Destroy (gameObject);
+//		}
 	}
 }

@@ -6,10 +6,10 @@ public class PheromoneNode : MonoBehaviour
 {
 
 	public float concentration;
-	public float defaultConc = 20f;
+	public float defaultConc = 30f;
 	private float maxConc = 100f;
-	protected float evaporationRate = 5f;
-	public float defaultScale = 0.5f;
+	protected float evaporationRate = 0.4f;
+	public float defaultScale = 1f;
 	//public bool exists = true;
 	public int gridX;
 	public int gridY;
