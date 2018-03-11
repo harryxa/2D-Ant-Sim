@@ -42,7 +42,7 @@ WANDERING,
 	protected Vector3 targetPosition;
 	protected float distanceRadius = 0.1f;
 	//box collider
-	protected float rotateSpeed = 5f;
+	protected float rotateSpeed = 20f;
 
 
 	protected PheromoneGrid pGrid;
@@ -54,15 +54,15 @@ WANDERING,
 	float halfWorldWidth;
 
 	//navigation
-	 Vector3 nextPosition;
-	public float antSpeed = 7f;
+	//Vector3 nextPosition;
+	public float antSpeed = 20f;
 
 	protected int limit = 5;
 	protected int limiti;
 
 	//smelling
-	public int smellRadius = 20;
-	public float smellStrength = 0.2f;
+	private int smellRadius = 20;
+	private float smellStrength = 0.4f;
 
 	protected bool leftNext;
 	protected int leftTurnsTried = 0;
@@ -121,55 +121,77 @@ WANDERING,
 	}
 
 
-	//TODO fix ant state changes
-	//detects pheremones within range of ant
-	protected Vector3 SmellDirection ()
-	{
-		//gets the ants location on the grid
-		Vector3 antGridPos = pGrid.worldToGrid (transform.position);
-		int gridX = Mathf.RoundToInt (antGridPos.x);
-		int gridY = Mathf.RoundToInt (antGridPos.y);
+    //TODO fix ant state changes
+    //detects pheremones within range of ant
+    protected Vector3 SmellDirection()
+    {
+        //gets the ants location on the grid
+        Vector3 antGridPos = pGrid.worldToGrid(transform.position);
+        int gridX = Mathf.RoundToInt(antGridPos.x);
+        int gridY = Mathf.RoundToInt(antGridPos.y);
 
-		Vector3 smellDirection = new Vector3 (antGridPos.x, antGridPos.y, 0f);
+        Vector3 smellDirection = new Vector3(antGridPos.x, antGridPos.y, 0f);
 
-		//loops through grid in square shape around ant
-		for (int x = gridX - smellRadius; x <= gridX + smellRadius; x++) {
-			for (int y = gridY - smellRadius; y <= gridY + smellRadius; y++) {	
-				//creates a vector from the ant to the node on the grid
-				Vector3 pherDir = new Vector3 (x - gridX, y - gridY, 0);
+        //loops through grid in square shape around ant
+        for (int x = gridX - smellRadius; x <= gridX + smellRadius; x++)
+        {
+            for (int y = gridY - smellRadius; y <= gridY + smellRadius; y++)
+            {
+                //creates a vector from the ant to the node on the grid
+                Vector3 pherDir = new Vector3(x - gridX, y - gridY, 0);
 
-				//limits the search to a radius around the ant, rather than a square. checks its in world
-				if (x >= 0 && x < worldWidth &&
-				    y >= 0 && y < worldHeight &&
-				    pherDir.magnitude <= smellRadius) {	
-					if (pGrid.grid [x, y] != null) {
+                //limits the search to a radius around the ant, rather than a square. checks its in world
+                if (x >= 0 && x < worldWidth && y >= 0 && y < worldHeight && pherDir.magnitude <= smellRadius)
+                {
+                    //if valid grid position
+                    if (pGrid.grid[x, y] != null)
+                    {
+                        //if ant is in wandering state
+                        if (state == AntState.WANDERING)
+                        {
+                            //if food is present go towards and set to carry (update to when the reach food and collect) 
+                            if (pGrid.grid[x, y].GetComponent<Food>() != null)
+                            {
+                                smellDirection = pherDir;
+                                smellDirection.Normalize();
 
-						if (pGrid.grid [x, y].GetComponent<Food> () != null) {	//if pheromone is food 	
-							if (state != AntState.CARRYING) {					//smell it if not carrying any
-								smellDirection = pherDir;
-								smellDirection.Normalize ();
+                                //set state to carry and smell strength increase (HACKY)
+                                
+                                if (gridX == x || gridY == y)
+                                {
+                                    smellStrength = 4f;
+                                    state = AntState.CARRYING;
 
-								Debug.DrawLine (transform.position, transform.position + smellDirection, Color.yellow);
-								state = AntState.CARRYING;
-								return smellDirection;
-							}
-						} else if (state == AntState.WANDERING)	//if wandering and cant smell food, dont steer
-							return new Vector3 (0, 0, 0);
+                                }
+                                return smellDirection;
+                            }
+                            //otherwise wander randomly
+                            else
+                            {
+                                smellDirection = Vector3.zero;
+                            }
+                        }
+                        //if carrying, head home
+                        else if(state == AntState.CARRYING)
+                        {
+                            Vector3 targetpos = pGrid.worldToGrid(pGrid.nestPosition);
 
+                            smellDirection = new Vector3(targetpos.x - gridX, targetpos.y - gridY, 0);
+                            //pherDir.Normalize();
+                            //pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().concentration;
+                            //smellDirection += pherDir;
+                        }
+                    }             
+                }
+            }
+        }
 
-						pherDir.Normalize ();
-						pherDir *= pGrid.grid [x, y].GetComponent<PheromoneNode> ().concentration;
-						smellDirection += pherDir;
-					}	
-				}
-			}
-		}
+        //smellDirection = pGrid.gridToWorld (smellDirection);
+        smellDirection.Normalize();
+        Debug.DrawLine(transform.position, transform.position + smellDirection, Color.black);
+        return smellStrength * smellDirection;
+    }
 
-		//smellDirection = pGrid.gridToWorld (smellDirection);
-		smellDirection.Normalize ();
-		Debug.DrawLine (transform.position, transform.position + smellDirection, Color.cyan);
-		return smellStrength * smellDirection;
-	}
 
 
 	//TODO: various pheremones sevreted deonding on the situation
@@ -196,7 +218,7 @@ WANDERING,
 			switch (state) 
 			{
 			case AntState.WANDERING:
-				SetTarget (SmellDirection() + RandomTarget ());
+				SetTarget (SmellDirection() + RandomTarget());
 				break;
 			case AntState.CARRYING:
 				SetTarget (SmellDirection ());
@@ -362,7 +384,7 @@ WANDERING,
 			Quaternion.Euler (0f, 0f, angle - 90f), 
 			rotateSpeed * Time.deltaTime);	
 
-		Debug.DrawLine (transform.position, targetPosition);
+		//Debug.DrawLine (transform.position, targetPosition);
 	}
 
 

@@ -17,6 +17,7 @@ public class PheromoneGrid : MonoBehaviour
 	public Transform nest;
 	public Transform carryPheromone;
 
+    public Vector3 nestPosition;
 	// Use this for initialization
 	void Start () 
 	{
@@ -109,11 +110,13 @@ public class PheromoneGrid : MonoBehaviour
 		int x = (int)gridPos.x;
 		int y = (int)gridPos.y;
 
-		Debug.Log (x + ", yoohooo " + y);
+		//Debug.Log (x + ", yoohooo " + y);
 
 		grid [x, y] = Instantiate (nest, gridToWorld(gridPos), Quaternion.identity);
 
-		NestPheromone node = grid [x, y].GetComponent<NestPheromone> ();
+        nestPosition = gridToWorld(gridPos);
+
+        NestPheromone node = grid [x, y].GetComponent<NestPheromone> ();
 		node.setXY (x, y);
 	}
 

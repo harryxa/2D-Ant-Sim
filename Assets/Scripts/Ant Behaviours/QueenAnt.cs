@@ -29,7 +29,7 @@ public class QueenAnt : AntClass
 
 	void SpawnAnts (int n)
 	{
-		if (antCount < 300)
+		if (antCount < 100)
 		if (timer > 0.02) {
 			Instantiate (workerAnt, transform.position, Quaternion.Euler (0, 0, Random.value * 360));
 			timer = 0;
