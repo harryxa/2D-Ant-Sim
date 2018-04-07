@@ -4,5 +4,7 @@ using UnityEngine;
 
 public class CarryingPheromone : PheromoneNode
 {
-
+    void Start()
+    {
+    }
 }

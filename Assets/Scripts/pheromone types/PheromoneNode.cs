@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class PheromoneNode : MonoBehaviour 
 {
+    protected SpriteRenderer m_spriteRenderer;
 
 	public float concentration;
 	public float defaultConc = 20f;
 	private float maxConc = 100f;
 	protected float evaporationRate = 0.5f;
-	public float defaultScale = 1f;
+	protected float defaultScale = 0.5f;
 	//public bool exists = true;
 	public int gridX;
 	public int gridY;
@@ -17,11 +18,13 @@ public class PheromoneNode : MonoBehaviour
 	void Start () 
 	{
 		concentration = defaultConc;
-	}
-	
-	void FixedUpdate () 
+        m_spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+    void FixedUpdate () 
 	{
-		if (concentration > 0f) 
+
+        if (concentration > 0f) 
 		{
 			if (concentration > maxConc)
 				concentration = maxConc;
@@ -42,9 +45,9 @@ public class PheromoneNode : MonoBehaviour
 		concentration += defaultConc;
 	}
 
-	public void setXY(int x, int y)
-	{
-		gridX = x;
-		gridY = y;
-	}
+    public void setXY(int x, int y)
+    {
+        gridX = x;
+        gridY = y;
+    }
 }
