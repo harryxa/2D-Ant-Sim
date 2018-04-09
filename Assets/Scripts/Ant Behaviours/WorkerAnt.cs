@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class WorkerAnt : AntClass {
 
-	public int carrying;			//the amount of food the ant is carrying
+	//public int carrying;			//the amount of food the ant is carrying
 	public int carryingThreshold;	//the threshold above which the ant will return to the nest
 
 //	// Use this for initialization

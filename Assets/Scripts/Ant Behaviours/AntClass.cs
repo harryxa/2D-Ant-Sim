@@ -3,6 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
+//instantiate all pheromones at start
+//array of list for pheromone grid all equals 0 to start
+//list contains different pheromone types
+
+//OR
+
+//have an all encompasing pheromone node that contains the conc. of all types
 
 public class AntClass : MonoBehaviour
 {
@@ -244,12 +251,12 @@ public class AntClass : MonoBehaviour
 	{
         if (state == AntState.WANDERING)
         {
-            pGrid.addPheromone(transform.position);
+			pGrid.addPheromone(transform.position, 'S');
         }
 
         else if (state == AntState.CARRYING || state == AntState.GATHERING)
         {
-            pGrid.addCarryingPheromone(transform.position);
+           pGrid.addPheromone(transform.position, 'C');
         }
 	}
 

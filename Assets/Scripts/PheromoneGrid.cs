@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PheromoneGrid : MonoBehaviour 
 {
-
+	
 	private float worldWidth = 100;
 	private float worldHeight = 100;
 	private int gridHeight = 100;
@@ -32,7 +32,7 @@ public class PheromoneGrid : MonoBehaviour
     }
 
     //TODO: add various types of pheromones
-    public void addPheromone(Vector3 worldPos)
+	public void addPheromone(Vector3 worldPos, char pType)
 	{
 		Vector3 gridPos = worldToGrid (worldPos);
 		gridPos.x = Mathf.RoundToInt(gridPos.x);
@@ -50,51 +50,51 @@ public class PheromoneGrid : MonoBehaviour
 			node.setXY (x, y);
 		}
 		//boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
-		else if (grid[x,y].GetComponent<PheromoneNode>().GetType() == (new PheromoneNode()).GetType())
+		else 
 		{
-            grid[x, y].GetComponent<PheromoneNode>().boostConc();
+			if (pType == 'S')
+           		grid[x, y].GetComponent<PheromoneNode>().boostStandardConc();
 
+			else if(pType == 'C')
+				grid[x, y].GetComponent<PheromoneNode>().boostCarryConc();
+			
         }
+   	 }
 
-        //instantiate new pheromone node
-
-    }
-
-	public void addCarryingPheromone(Vector3 worldPos)
-	{
-		Vector3 gridPos = worldToGrid (worldPos);
-		gridPos.x = Mathf.RoundToInt(gridPos.x);
-		gridPos.y = Mathf.RoundToInt(gridPos.y);
-		int x = (int)gridPos.x;
-		int y = (int)gridPos.y;
-
-        if (grid[x, y] == null)
-        {
-            //instantiate pheromone
-            grid[x, y] = Instantiate(carryPheromone, gridToWorld(gridPos), Quaternion.identity);
-
-            CarryingPheromone node = grid[x, y].GetComponent<CarryingPheromone>();
-            node.setXY(x, y);
-        }
-        //else if (grid[x,y].GetComponent<PheromoneNode>().GetType() == (new PheromoneNode()).GetType())
-        //{
-        //   // grid[x, y].GetComponent<PheromoneNode>().concentration = 0f;
-        //}
-
-        //boost concentration of existing pheromone // ### Is instantiating an object too slow? ###        
-        //else if (grid[x, y].GetComponent<CarryingPheromone>().GetType() == (new CarryingPheromone()).GetType())
-        // {
-        //    grid[x, y].GetComponent<CarryingPheromone>().boostConc();
-        // }
-
-        //instantiate new pheromone node
-
-    }
+//	public void addCarryingPheromone(Vector3 worldPos)
+//	{
+//		Vector3 gridPos = worldToGrid (worldPos);
+//		gridPos.x = Mathf.RoundToInt(gridPos.x);
+//		gridPos.y = Mathf.RoundToInt(gridPos.y);
+//		int x = (int)gridPos.x;
+//		int y = (int)gridPos.y;
+//
+//        if (grid[x, y] == null)
+//        {
+//            //instantiate pheromone
+//            grid[x, y] = Instantiate(carryPheromone, gridToWorld(gridPos), Quaternion.identity);
+//
+//            CarryingPheromone node = grid[x, y].GetComponent<CarryingPheromone>();
+//            node.setXY(x, y);
+//        }
+//        else if (grid[x,y].GetComponent<PheromoneNode>().GetType() == (new PheromoneNode()).GetType())
+//        {
+//            grid[x, y].GetComponent<PheromoneNode>().concentration = 0f;
+//        }
+//
+//        //boost concentration of existing pheromone // ### Is instantiating an object too slow? ###        
+//        else if (grid[x, y].GetComponent<CarryingPheromone>().GetType() == (new CarryingPheromone()).GetType())
+//         {
+//            grid[x, y].GetComponent<CarryingPheromone>().boostConc();
+//         }
+//
+//        //instantiate new pheromone node
+//
+//    }
 
 
     public void addFood(Vector3 worldPos)
-	{
-		
+	{		
 		Vector3 gridPos = worldToGrid (worldPos);
 		gridPos.x = Mathf.RoundToInt(gridPos.x);
 		gridPos.y = Mathf.RoundToInt(gridPos.y);
@@ -105,12 +105,10 @@ public class PheromoneGrid : MonoBehaviour
 
 		Food node = grid [x, y].GetComponent<Food> ();
 		node.setXY (x, y);
-
 	}
 
 	public void addNest(Vector3 worldPos)
 	{
-
 		Vector3 gridPos = worldToGrid (worldPos);
 		gridPos.x = Mathf.RoundToInt(gridPos.x);
 		gridPos.y = Mathf.RoundToInt(gridPos.y);
