@@ -63,19 +63,25 @@ public class PheromoneNode : MonoBehaviour
 				pheromoneConcentration = maxConc;
 
 			pheromoneConcentration -= evaporationRate * Time.deltaTime;
-			float scale = (pheromoneConcentration / defaultConc) * defaultScale; 
 
-			transform.localScale = new Vector3(scale,scale,scale);
+            if (pheromoneConcentration > carryConcentration)
+            {
+                float scale = (pheromoneConcentration / defaultConc) * defaultScale;
+                transform.localScale = new Vector3(scale, scale, scale);
+            }
 		}
-		else if (carryConcentration > 0f) 
+		if (carryConcentration > 0f) 
 		{
 			if (carryConcentration > maxConc)
 				carryConcentration = maxConc;
 
 			carryConcentration -= evaporationRate * Time.deltaTime;
-			float scale = (carryConcentration / defaultConc) * defaultScale; 
 
-			transform.localScale = new Vector3(scale,scale,scale);
+            if (pheromoneConcentration < carryConcentration)
+            {
+                float scale = (carryConcentration / defaultConc) * defaultScale;
+                transform.localScale = new Vector3(scale, scale, scale);
+            }
 		}
 		else
 		{
@@ -92,8 +98,8 @@ public class PheromoneNode : MonoBehaviour
         }
         else if (carryConcentration > pheromoneConcentration)
         {
-            if (m_spriteRenderer.color != Color.magenta)
-                m_spriteRenderer.color = Color.magenta;
+            if (m_spriteRenderer.color != Color.blue)
+                m_spriteRenderer.color = Color.blue;
         }
     }
 
