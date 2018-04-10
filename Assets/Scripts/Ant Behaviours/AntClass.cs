@@ -67,9 +67,7 @@ public class AntClass : MonoBehaviour
 
 	protected float turningAngle = 5;
 	protected float angleMultiplier = 1.1f;
-
-
-
+    
 	void Start ()
 	{
         m_SpriteRenderer = GetComponent<SpriteRenderer>();
@@ -212,7 +210,7 @@ public class AntClass : MonoBehaviour
                             smellDirection = new Vector3(targetpos.x - gridX, targetpos.y - gridY, 0);
 
                             pherDir.Normalize();
-                            pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().concentration;
+                            pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration;
                             smellDirection += pherDir;
 
                             if (gridX == targetpos.x || gridY == targetpos.y)
@@ -228,7 +226,7 @@ public class AntClass : MonoBehaviour
                         {
                             
                             pherDir.Normalize();
-                            pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().concentration;
+                            pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration;
                             smellDirection += pherDir;
 
                         }

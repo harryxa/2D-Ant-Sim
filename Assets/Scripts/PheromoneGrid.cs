@@ -38,28 +38,33 @@ public class PheromoneGrid : MonoBehaviour
 		gridPos.x = Mathf.RoundToInt(gridPos.x);
 		gridPos.y = Mathf.RoundToInt(gridPos.y);
 		int x = (int)gridPos.x;
-		int y = (int)gridPos.y;
+		int y = (int)gridPos.y;                    
 
-
-		if (grid[x, y] == null)
+        if (grid[x, y] == null)
 		{
 			//instantiate pheromone
 			grid [x, y] = Instantiate(pheromone, gridToWorld(gridPos), Quaternion.identity);
            
 			PheromoneNode node = grid [x, y].GetComponent<PheromoneNode> ();
 			node.setXY (x, y);
-		}
-		//boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
-		else 
-		{
-			if (pType == 'S')
-           		grid[x, y].GetComponent<PheromoneNode>().boostStandardConc();
+            BoostConcentration(pType, x, y);
+        }
 
-			else if(pType == 'C')
-				grid[x, y].GetComponent<PheromoneNode>().boostCarryConc();
-			
+		//boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
+		else
+		{
+            BoostConcentration(pType, x, y);
         }
    	 }
+
+    private void BoostConcentration(char pType, int x, int y)
+    {
+        if (pType == 'S')
+            grid[x, y].GetComponent<PheromoneNode>().boostStandardConc();
+
+        else if (pType == 'C')
+            grid[x, y].GetComponent<PheromoneNode>().boostCarryConc();
+    }
 
 //	public void addCarryingPheromone(Vector3 worldPos)
 //	{

@@ -16,32 +16,32 @@ public class PheromoneNode : MonoBehaviour
 	public int gridX;
 	public int gridY;
 
-	public float concentration;
-	public float foodConcentration;
-	public float nestConcentration;
-	public float carryConcentration;
+	public float pheromoneConcentration = 0f;
+	public float foodConcentration = 0f;
+	public float nestConcentration = 0f;
+	public float carryConcentration = 0f;
 
 
-
-	void Start () 
-	{
-		concentration = defaultConc;
-		foodConcentration = defaultConc;
-		nestConcentration = defaultConc;
-		carryConcentration = defaultConc;
-
-
+    void Awake()
+    {
         m_spriteRenderer = GetComponent<SpriteRenderer>();
+    }
+
+
+    void Start () 
+	{
+		
     }
 
     void FixedUpdate () 
 	{
-		reducePheromoneConcentration ();    
-	}
+		reducePheromoneConcentration ();
+        changePheromoneColour();
+    }
 
 	public void boostStandardConc() 
 	{
-		concentration += defaultConc;
+		pheromoneConcentration += defaultConc;
 	}
 
 	public void boostCarryConc() 
@@ -57,13 +57,13 @@ public class PheromoneNode : MonoBehaviour
 
 	public void reducePheromoneConcentration()
 	{
-		if (concentration > 0f) 
+		if (pheromoneConcentration > 0f) 
 		{
-			if (concentration > maxConc)
-				concentration = maxConc;
+			if (pheromoneConcentration > maxConc)
+				pheromoneConcentration = maxConc;
 
-			concentration -= evaporationRate * Time.deltaTime;
-			float scale = (concentration / defaultConc) * defaultScale; 
+			pheromoneConcentration -= evaporationRate * Time.deltaTime;
+			float scale = (pheromoneConcentration / defaultConc) * defaultScale; 
 
 			transform.localScale = new Vector3(scale,scale,scale);
 		}
@@ -82,4 +82,19 @@ public class PheromoneNode : MonoBehaviour
 			//Destroy(gameObject);
 		}
 	}
+
+    public void changePheromoneColour()
+    {
+        if(pheromoneConcentration > carryConcentration)
+        {
+            if (m_spriteRenderer.color != Color.white)
+                m_spriteRenderer.color = Color.white;
+        }
+        else if (carryConcentration > pheromoneConcentration)
+        {
+            if (m_spriteRenderer.color != Color.magenta)
+                m_spriteRenderer.color = Color.magenta;
+        }
+    }
+
 }

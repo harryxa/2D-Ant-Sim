@@ -12,8 +12,8 @@ public class Food : PheromoneNode
 
 	void Start()
 	{		
-		concentration = quantity * smellFactor;
-		startingConcentration = concentration;
+		pheromoneConcentration = quantity * smellFactor;
+		startingConcentration = pheromoneConcentration;
 		defaultScale = 2f;
 	}
 
