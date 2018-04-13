@@ -17,7 +17,8 @@ public class PheromoneGrid : MonoBehaviour
 	public Transform nest;
 	public Transform carryPheromone;
 
-    public Vector3 nestPosition;
+    public Vector3 worldNestPosition;
+    public Vector3 worldFoodPosition;
 	// Use this for initialization
 	void Start () 
 	{
@@ -38,24 +39,24 @@ public class PheromoneGrid : MonoBehaviour
 		gridPos.x = Mathf.RoundToInt(gridPos.x);
 		gridPos.y = Mathf.RoundToInt(gridPos.y);
 		int x = (int)gridPos.x;
-		int y = (int)gridPos.y;                    
+		int y = (int)gridPos.y;
 
         if (grid[x, y] == null)
-		{
-			//instantiate pheromone
-			grid [x, y] = Instantiate(pheromone, gridToWorld(gridPos), Quaternion.identity);
-           
-			PheromoneNode node = grid [x, y].GetComponent<PheromoneNode> ();
-			node.setXY (x, y);
+        {
+            //instantiate pheromone
+            grid[x, y] = Instantiate(pheromone, gridToWorld(gridPos), Quaternion.identity);
+
+            PheromoneNode node = grid[x, y].GetComponent<PheromoneNode>();
+            node.setXY(x, y);
             BoostConcentration(pType, x, y);
         }
 
-		//boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
+        //boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
 		else
 		{
             BoostConcentration(pType, x, y);
         }
-   	 }
+    }
 
     private void BoostConcentration(char pType, int x, int y)
     {
@@ -108,7 +109,9 @@ public class PheromoneGrid : MonoBehaviour
 
 		grid [x, y] = Instantiate (genericFood, gridToWorld(gridPos), Quaternion.identity);
 
-		Food node = grid [x, y].GetComponent<Food> ();
+        worldFoodPosition = gridToWorld(gridPos);
+
+        Food node = grid [x, y].GetComponent<Food> ();
 		node.setXY (x, y);
 	}
 
@@ -124,7 +127,7 @@ public class PheromoneGrid : MonoBehaviour
 
 		grid [x, y] = Instantiate (nest, gridToWorld(gridPos), Quaternion.identity);
 
-        nestPosition = gridToWorld(gridPos);
+        worldNestPosition = gridToWorld(gridPos);
 
         NestPheromone node = grid [x, y].GetComponent<NestPheromone> ();
 		node.setXY (x, y);

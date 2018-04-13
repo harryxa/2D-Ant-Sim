@@ -4,18 +4,19 @@ using UnityEngine;
 
 public class PheromoneNode : MonoBehaviour 
 {
-
-
     protected SpriteRenderer m_spriteRenderer;
 
-	public float defaultConc = 20f;
+	private float defaultConc = 1f;
 	private float maxConc = 100f;
-	public float evaporationRate = 0.5f;
-	public float defaultScale = 0.5f;
+
+	protected float evaporationRate = 0.001f;
+	public float defaultScale = 0.01f;
+
 	//public bool exists = true;
 	public int gridX;
 	public int gridY;
 
+    //PHEROMONE TYPES
 	public float pheromoneConcentration = 0f;
 	public float foodConcentration = 0f;
 	public float nestConcentration = 0f;
@@ -46,7 +47,7 @@ public class PheromoneNode : MonoBehaviour
 
 	public void boostCarryConc() 
 	{
-		carryConcentration += defaultConc;
+		carryConcentration += defaultConc * 2;
 	}
 
     public void setXY(int x, int y)
@@ -55,8 +56,10 @@ public class PheromoneNode : MonoBehaviour
         gridY = y;
     }
 
+    //reduces all pheromone concentrations
 	public void reducePheromoneConcentration()
 	{
+        //STANDARD PHEROMONE
 		if (pheromoneConcentration > 0f) 
 		{
 			if (pheromoneConcentration > maxConc)
@@ -70,6 +73,7 @@ public class PheromoneNode : MonoBehaviour
                 transform.localScale = new Vector3(scale, scale, scale);
             }
 		}
+        //CARRY PHEROMONE
 		if (carryConcentration > 0f) 
 		{
 			if (carryConcentration > maxConc)

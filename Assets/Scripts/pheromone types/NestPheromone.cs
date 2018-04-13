@@ -8,11 +8,11 @@ public class NestPheromone : PheromoneNode {
 	void Start () {
 		
 		evaporationRate = 0;
-		pheromoneConcentration = 20f;
+		pheromoneConcentration = 1f;
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void FixedUpdate () {
 		
 	}
 }

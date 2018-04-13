@@ -11,10 +11,12 @@ public class Food : PheromoneNode
 	private float startingConcentration;
 
 	void Start()
-	{		
-		pheromoneConcentration = quantity * smellFactor;
-		startingConcentration = pheromoneConcentration;
-		defaultScale = 2f;
+	{
+        pheromoneConcentration = quantity * smellFactor;
+        startingConcentration = pheromoneConcentration;
+
+        pheromoneConcentration = 1f;
+		defaultScale = 0.5f;
 	}
 
 	void FixedUpdate()

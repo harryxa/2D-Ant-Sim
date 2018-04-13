@@ -16,7 +16,7 @@ public class FoodManager : MonoBehaviour {
 	void Update () 
 	{
 		if (i == 0) {
-			pGrid.addFood (new Vector3 (0, 10, 0));
+			pGrid.addFood (new Vector3 (30, 30, 0));
 			i++;
 		}
 	}
