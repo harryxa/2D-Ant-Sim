@@ -6,11 +6,11 @@ public class PheromoneNode : MonoBehaviour
 {
     protected SpriteRenderer m_spriteRenderer;
 
-	private float defaultConc = 1f;
+	private float defaultConc = 5f;
 	private float maxConc = 100f;
 
-	protected float evaporationRate = 0.001f;
-	public float defaultScale = 0.01f;
+	protected float evaporationRate = 0.04f;
+	protected float defaultScale = 0.1f;
 
 	//public bool exists = true;
 	public int gridX;
@@ -45,9 +45,9 @@ public class PheromoneNode : MonoBehaviour
 		pheromoneConcentration += defaultConc;
 	}
 
-	public void boostCarryConc() 
+	public void boostCarryConc(float multiplier) 
 	{
-		carryConcentration += defaultConc * 2;
+		carryConcentration += defaultConc * multiplier;
 	}
 
     public void setXY(int x, int y)

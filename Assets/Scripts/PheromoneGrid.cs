@@ -33,7 +33,7 @@ public class PheromoneGrid : MonoBehaviour
     }
 
     //TODO: add various types of pheromones
-	public void addPheromone(Vector3 worldPos, char pType)
+	public void addPheromone(Vector3 worldPos, char pType, float concentrationMultiplier)
 	{
 		Vector3 gridPos = worldToGrid (worldPos);
 		gridPos.x = Mathf.RoundToInt(gridPos.x);
@@ -48,23 +48,23 @@ public class PheromoneGrid : MonoBehaviour
 
             PheromoneNode node = grid[x, y].GetComponent<PheromoneNode>();
             node.setXY(x, y);
-            BoostConcentration(pType, x, y);
+            BoostConcentration(pType, x, y, concentrationMultiplier);
         }
 
         //boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
 		else
 		{
-            BoostConcentration(pType, x, y);
+            BoostConcentration(pType, x, y, concentrationMultiplier);
         }
     }
 
-    private void BoostConcentration(char pType, int x, int y)
+    private void BoostConcentration(char pType, int x, int y, float multiplier)
     {
         if (pType == 'S')
             grid[x, y].GetComponent<PheromoneNode>().boostStandardConc();
 
         else if (pType == 'C')
-            grid[x, y].GetComponent<PheromoneNode>().boostCarryConc();
+            grid[x, y].GetComponent<PheromoneNode>().boostCarryConc(multiplier);
     }
 
 //	public void addCarryingPheromone(Vector3 worldPos)

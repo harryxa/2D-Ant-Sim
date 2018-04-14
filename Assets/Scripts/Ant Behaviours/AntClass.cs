@@ -21,7 +21,7 @@ public class AntClass : MonoBehaviour
 
 	public enum AntState
 	{
-        WANDERING,
+        Scouting,
 		CARRYING,
 		GATHERING
     };
@@ -35,7 +35,7 @@ public class AntClass : MonoBehaviour
 
 	//wander variables for random target
 	protected float jitterScale = 0.5f;
-	protected float wanderDistance = 1.5f;
+	protected float wanderDistance = 1f;
 	protected Vector3 targetPosition;
 	protected float distanceRadius = 0.1f;
 	//box collider
@@ -53,7 +53,6 @@ public class AntClass : MonoBehaviour
 	//navigation
 	//Vector3 nextPosition;
 	public float antSpeed = 20f;
-    Vector3 knownFoodPos;
 
 	protected int limit = 5;
 	protected int limiti;
@@ -66,11 +65,13 @@ public class AntClass : MonoBehaviour
 	protected int leftTurnsTried = 0;
 	protected int rightTurnsTried = 0;
 
-	protected float turningAngle = 5;
+	protected float turningAngle = 0.5f;
 	protected float angleMultiplier = 1.1f;
 
     private Vector3 smellDirection;
     private Vector3 pherDir;
+
+
 
     void Start ()
 	{
@@ -93,7 +94,7 @@ public class AntClass : MonoBehaviour
 		ResetTargetCheck ();
 
 		if (Random.value > 0f)
-			state = AntState.WANDERING;
+			state = AntState.Scouting;
 		else
 			state = AntState.GATHERING;
 
@@ -118,8 +119,10 @@ public class AntClass : MonoBehaviour
 		}
 
         changeAntColour();
-            
+        StateChange();
     }
+
+
 
     //Sets the target for the ant then move the ant there
     protected void Move()
@@ -132,19 +135,31 @@ public class AntClass : MonoBehaviour
             switch (state)
             {
                 //if wandering smell for food and randomly wander around the map
-                case AntState.WANDERING:
+                case AntState.Scouting:
                     SetTarget(SmellDirection() + RandomTarget());
+                    Debug.DrawLine(transform.position, transform.position + SmellDirection(), Color.blue);
+
                     break;
 
                 //if carrying food follow pheromones
                 //TODO: follow food gathering pheromone
                 case AntState.CARRYING:
-                    SetTarget(SmellDirection());
+
+                    SetTarget(SmellDirection() + RandomTarget() + NestDirection());
+                    //SetTarget(SmellDirection() + RandomTarget() + NestDirection());
+                   //etTarget(SmellDirection());
+
+                    Debug.DrawLine(transform.position, transform.position + SmellDirection(), Color.blue);
+                   // Debug.DrawLine(transform.position, transform.position + RandomTarget(), Color.red);
+                   // Debug.DrawLine(transform.position, transform.position + NestDirection(), Color.black);
+
                     break;
 
                 //if gathering smell pheromone and randomly wander
                 case AntState.GATHERING:
-                    SetTarget(SmellDirection());
+                    SetTarget(SmellDirection() + FoodDirection());
+                    Debug.DrawLine(transform.position, transform.position + SmellDirection(), Color.blue);
+
                     break;
             }
             FixTarget(); //....
@@ -184,48 +199,33 @@ public class AntClass : MonoBehaviour
                     {
                         //if WANDERING smell for food and randomly wander around the map
                         //set state to carry if food found                        
-                        if (state == AntState.WANDERING)
+                        if (state == AntState.Scouting)
                         {
-                            SmellForFood(x, y);                            
+                            //returns a smell direction if food smelt
+                            SmellForFood(x, y);
+                            return smellDirection;
+                            
                         }
                         //if CARRYING, head home
                         else if (state == AntState.CARRYING)
                         {
-                            //gets the nests location
-                            Vector3 targetpos = pGrid.worldToGrid(pGrid.worldNestPosition);
-
-                            smellDirection = new Vector3(targetpos.x - gridX, targetpos.y - gridY, 0);
-                            //smellDirection.Normalize();
-
                             pherDir.Normalize();
-                            pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration;
+                            pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration + pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
                             smellDirection += pherDir;
-
-                            Vector3 targetdest = pGrid.worldNestPosition;
-                            if (TargetReached(targetdest, 2f))
-                            {
-                                state = AntState.GATHERING;
-                            }
+                            //Debug.DrawLine(smellDirection, transform.position);
 
                         }
                         //if GATHERING smell pheromones
                         //TODO: smell food and collect
                         else if (state == AntState.GATHERING)
-                        {
-                            Vector3 targetpos = pGrid.worldToGrid(pGrid.worldFoodPosition);
-
-                            smellDirection = new Vector3(targetpos.x - gridX, targetpos.y - gridY, 0);
-                            //smellDirection.Normalize();
-
-                            pherDir.Normalize();
-                            pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
-                            smellDirection += pherDir;
-
-                            Vector3 targetdest = pGrid.worldFoodPosition;
-                            if (TargetReached(targetdest, 2))
+                        {  
+                            if(pGrid.grid[x,y].GetComponent<PheromoneNode>().carryConcentration > 0)
                             {
-                                state = AntState.CARRYING;
+                                pherDir.Normalize();
+                                pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
+                                smellDirection += pherDir;
                             }
+                            
                         }
                     }             
                 }
@@ -234,109 +234,122 @@ public class AntClass : MonoBehaviour
 
         //smellDirection = pGrid.gridToWorld (smellDirection);
         smellDirection.Normalize();
-        Debug.DrawLine(transform.position, transform.position + smellDirection, Color.black);
 
         return smellStrength * smellDirection;
     }
+
+    public void StateChange()
+    {
+        Vector3 targetdest = Vector3.zero;
+
+        switch (state)
+        {
+            case AntState.Scouting:
+
+                targetdest = pGrid.worldFoodPosition;
+
+                //set state to carry
+                if (TargetReached(targetdest, 2f))
+                {
+                    state = AntState.CARRYING;
+                }
+                break;
+
+
+            case AntState.CARRYING:
+                targetdest = pGrid.worldNestPosition;
+                if (TargetReached(targetdest, 2f))
+                {
+                    state = AntState.GATHERING;
+                }
+
+                break;
+
+            //if gathering smell pheromone and randomly wander
+            case AntState.GATHERING:
+
+                targetdest = pGrid.worldFoodPosition;
+                if (TargetReached(targetdest, 2f))
+                {
+                    state = AntState.CARRYING;
+                }
+                break;
+        }
+    }
+
+    public Vector3 NestDirection()
+    {
+        Vector3 targetpos = Vector3.zero;
+
+        if(targetpos != pGrid.worldNestPosition)
+        {
+            targetpos = pGrid.worldNestPosition;
+        }
+
+        Vector3 nestDirection = new Vector3(targetpos.x - transform.position.x, targetpos.y - transform.position.y, 0);
+        nestDirection.Normalize();
+
+        return nestDirection;
+        //Debug.DrawLine(transform.position, transform.position + nestDirection, Color.black);
+    }
+
+    public Vector3 FoodDirection()
+    {
+        Vector3 targetpos = Vector3.zero;
+
+        if (targetpos != pGrid.worldFoodPosition)
+        {
+            targetpos = pGrid.worldFoodPosition;
+        }
+
+        Vector3 foodDirection = new Vector3(targetpos.x - transform.position.x, targetpos.y - transform.position.y, 0);
+        foodDirection.Normalize();
+
+        return foodDirection;
+        //Debug.DrawLine(transform.position, transform.position + nestDirection, Color.black);
+    }
+
 
 
     //TODO: various pheremones sevreted deonding on the situation
     //secretes a pheremone where the ant is currently standing
     void secrete ()
 	{
-        if (state == AntState.WANDERING)
+        if (state == AntState.Scouting)
         {
-			pGrid.addPheromone(transform.position, 'S');
+			pGrid.addPheromone(transform.position, 'S', 1.0f);
         }
 
         else if (state == AntState.CARRYING)
         {
-           pGrid.addPheromone(transform.position, 'C');
+            float nestDista = Vector3.Distance(transform.position, pGrid.worldNestPosition);
+            if(nestDista > 5f)
+            {
+                pGrid.addPheromone(transform.position, 'C', 2.0f);
+            }
+            else
+            {
+                pGrid.addPheromone(transform.position, 'C', 4f);
+
+            }
         }
 	}
 
     //if food within search radius a vector to the food is returned
     //else, the vector equals zero
-    public Vector3 SmellForFood(int x, int y)
+    public void SmellForFood(int x, int y)
     {
         if (pGrid.grid[x, y].GetComponent<Food>() != null)
         {
             smellDirection = pherDir;
             smellDirection.Normalize();
-
-            Vector3 targetpos = pGrid.worldFoodPosition;
-
-            //set state to carry
-            if (TargetReached(targetpos, 2f))
-            {
-                state = AntState.CARRYING;
-            }
-            return smellDirection;
         }
         else
         {
             smellDirection = Vector3.zero;
-            return smellDirection;
         }
     }
-
-    //old secrete function
-    //void secrete()
-    //{
-    //    //limit = 5
-    //    //limiti = random number between 0 and 5
-    //    if (limit >= limiti)
-    //    {
-
-    //        pGrid.addPheromone(transform.position);
-
-
-    //        limiti = 0;
-    //    }
-    //    else
-    //        limiti++;
-    //}
-
-
-    //TODO fix movement, trying to sort smeel direction to only get called when ants are at taregt location
-
-    //TODO: ants follow different pheromones depending on the situation
-    //moves the ant in the direction its facing
-    //	protected void MoveAnt ()
-    //	{
-    //		//SetTarget(SmellDirection());
-    //		//SetTarget (RandomTarget());
-    //
-    //
-    //		SetTarget (SmellDirection () + RandomTarget ());
-    //		//SetTarget (RandomTarget ());
-    //
-    //		//boundingBox ();
-    //		FixTarget ();
-    //
-    //		steer ();
-    //		float step = antSpeed * Time.deltaTime;
-    //		transform.position = Vector3.MoveTowards (transform.position, targetPosition, step);
-    //	}
-
-    //TODO get rid
-    //	protected void MoveAntRand ()
-    //	{			
-    //		//SetTarget(SmellDirection());
-    //		//SetTarget (RandomTarget());
-    //
-    //
-    //		//SetTarget (SmellDirection () + RandomTarget ());
-    //		TargetReached (RandomTarget ());// TODO oioio ioio
-    //
-    //		//boundingBox ();
-    //		FixTarget ();
-    //
-    //		steer ();
-    //		float step = antSpeed * Time.deltaTime;
-    //		transform.position = Vector3.MoveTowards (transform.position, targetPosition, step);	
-    //	}
-
+    
     protected bool CheckTarget ()
 	{
 
@@ -428,7 +441,8 @@ public class AntClass : MonoBehaviour
 	protected void SetTarget (Vector3 target)
 	{
 		targetPosition = transform.position + transform.up * wanderDistance + target;
-	}
+        //Debug.DrawLine(transform.position, targetPosition);
+    }
 
     //bounds ants within area
     //protected void boundingBox ()
@@ -464,7 +478,7 @@ public class AntClass : MonoBehaviour
     private void changeAntColour()
     {
 
-        if(state == AntState.WANDERING)
+        if(state == AntState.Scouting)
         {
             if(m_SpriteRenderer.color != Color.red)
                 m_SpriteRenderer.color = Color.red;
