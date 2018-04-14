@@ -21,7 +21,7 @@ public class AntClass : MonoBehaviour
 
 	public enum AntState
 	{
-        Scouting,
+        SCOUTING,
 		CARRYING,
 		GATHERING
     };
@@ -58,7 +58,7 @@ public class AntClass : MonoBehaviour
 	protected int limiti;
 
 	//SMELLING VARIABLES
-	private int smellRadius = 10;
+	private int smellRadius = 7;
 	private float smellStrength = 1f;
 
 	protected bool leftNext;
@@ -94,7 +94,7 @@ public class AntClass : MonoBehaviour
 		ResetTargetCheck ();
 
 		if (Random.value > 0f)
-			state = AntState.Scouting;
+			state = AntState.SCOUTING;
 		else
 			state = AntState.GATHERING;
 
@@ -135,7 +135,7 @@ public class AntClass : MonoBehaviour
             switch (state)
             {
                 //if wandering smell for food and randomly wander around the map
-                case AntState.Scouting:
+                case AntState.SCOUTING:
                     SetTarget(SmellDirection() + RandomTarget());
                     Debug.DrawLine(transform.position, transform.position + SmellDirection(), Color.blue);
 
@@ -171,7 +171,6 @@ public class AntClass : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, step);
     }
 
-    //TODO fix ant state changes
     //detects pheremones within range of ant
     protected Vector3 SmellDirection()
     {
@@ -199,10 +198,14 @@ public class AntClass : MonoBehaviour
                     {
                         //if WANDERING smell for food and randomly wander around the map
                         //set state to carry if food found                        
-                        if (state == AntState.Scouting)
+                        if (state == AntState.SCOUTING)
                         {
                             //returns a smell direction if food smelt
                             SmellForFood(x, y);
+                            if(pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration > 0)
+                            {
+                                state = AntState.GATHERING;
+                            }
                             return smellDirection;
                             
                         }
@@ -224,8 +227,7 @@ public class AntClass : MonoBehaviour
                                 pherDir.Normalize();
                                 pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
                                 smellDirection += pherDir;
-                            }
-                            
+                            }                            
                         }
                     }             
                 }
@@ -244,17 +246,15 @@ public class AntClass : MonoBehaviour
 
         switch (state)
         {
-            case AntState.Scouting:
+            case AntState.SCOUTING:
 
                 targetdest = pGrid.worldFoodPosition;
-
                 //set state to carry
                 if (TargetReached(targetdest, 2f))
                 {
                     state = AntState.CARRYING;
                 }
                 break;
-
 
             case AntState.CARRYING:
                 targetdest = pGrid.worldNestPosition;
@@ -265,9 +265,7 @@ public class AntClass : MonoBehaviour
 
                 break;
 
-            //if gathering smell pheromone and randomly wander
             case AntState.GATHERING:
-
                 targetdest = pGrid.worldFoodPosition;
                 if (TargetReached(targetdest, 2f))
                 {
@@ -315,7 +313,7 @@ public class AntClass : MonoBehaviour
     //secretes a pheremone where the ant is currently standing
     void secrete ()
 	{
-        if (state == AntState.Scouting)
+        if (state == AntState.SCOUTING)
         {
 			pGrid.addPheromone(transform.position, 'S', 1.0f);
         }
@@ -478,7 +476,7 @@ public class AntClass : MonoBehaviour
     private void changeAntColour()
     {
 
-        if(state == AntState.Scouting)
+        if(state == AntState.SCOUTING)
         {
             if(m_SpriteRenderer.color != Color.red)
                 m_SpriteRenderer.color = Color.red;
