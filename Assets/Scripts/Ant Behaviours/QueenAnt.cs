@@ -8,41 +8,43 @@ public class QueenAnt : AntClass
     public List<GameObject> ants;
 	public GameObject workerAnt;
 	public int antCount;
-	private float timer = 0;
 
     private int activeAnts = 0;
-    public int activeScouts = 0;
+    public int activeScouts = 10;
+    int antcounter;
 
-	// Use this for initialization
-	void Start ()
+    // Use this for initialization
+    void Start ()
 	{
 		this.pGrid = GameObject.FindWithTag("PGrid").GetComponent<PheromoneGrid>();
 
 		this.pGrid.addNest (transform.position);
 		antSpeed = 0;
-		SpawnAnts();
         ants = new List<GameObject>();
+		SpawnAnts();
 
-        for (int i = 0; i <= ants.Count; i++)
-        {
-            if(activeAnts <= activeScouts )
-            {
-                if(ants[i].active == false)
-                {
 
-                }
-            }
-        }
+        antcounter = ants.Count;
+        Debug.Log(antcounter);
     }
 	
 	// Update is called once per frame
 	void Update ()
 	{
-        for(int i = 0; i <= ants.Count; i++)
+        for (int i = 0; i <= antcounter; i++)
         {
+            if (activeAnts <= activeScouts)
+            {
+                if (ants[i].activeSelf == false)
+                {
+                    ants[i].SetActive(true);
+                    activeAnts++;
+                }
 
+            }
         }
-	}
+
+    }
 
 	void SpawnAnts ()
 	{
@@ -50,9 +52,7 @@ public class QueenAnt : AntClass
         {
             GameObject ant = Instantiate(workerAnt, transform.position, Quaternion.Euler(0, 0, Random.value * 360));
             ants.Add(ant);
-            ants[i].SetActive(false);
-            
+            ants[i].SetActive(false);            
         }
     }
-
 }

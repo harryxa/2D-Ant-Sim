@@ -9,7 +9,7 @@ public class PheromoneNode : MonoBehaviour
 	private float defaultConc = 5f;
 	private float maxConc = 100f;
 
-	protected float evaporationRate = 0.04f;
+	protected float evaporationRate = 0.08f;
 	protected float defaultScale = 0.1f;
 
 	//public bool exists = true;
@@ -18,7 +18,6 @@ public class PheromoneNode : MonoBehaviour
 
     //PHEROMONE TYPES
 	public float pheromoneConcentration = 0f;
-	public float foodConcentration = 0f;
 	public float nestConcentration = 0f;
 	public float carryConcentration = 0f;
 
@@ -34,7 +33,7 @@ public class PheromoneNode : MonoBehaviour
 		
     }
 
-    void FixedUpdate () 
+    void Update () 
 	{
 		reducePheromoneConcentration ();
         changePheromoneColour();
