@@ -7,6 +7,7 @@ public class Food : PheromoneNode
 
 	private float quantity = 100000f;
 	public float smellFactor = 2f;
+    public Vector3 worldFoodPosition;
 
 	private float startingConcentration;
 

@@ -18,12 +18,12 @@ public class PheromoneGrid : MonoBehaviour
 	public Transform carryPheromone;
 
     public Vector3 worldNestPosition;
-    public Vector3 worldFoodPosition;
 	// Use this for initialization
 	void Start () 
 	{
 		//grid can range from 0 to 10, so + 1
 		grid = new Transform[gridWidth + 1, gridHeight + 1];
+        
     }
 
     // Update is called once per frame
@@ -38,17 +38,28 @@ public class PheromoneGrid : MonoBehaviour
 		Vector3 gridPos = worldToGrid (worldPos);
 		gridPos.x = Mathf.RoundToInt(gridPos.x);
 		gridPos.y = Mathf.RoundToInt(gridPos.y);
-		int x = (int)gridPos.x;
+
+        
+
+        int x = (int)gridPos.x;
 		int y = (int)gridPos.y;
+
+        gridPos.x += 0.5f;
+        gridPos.y += 0.5f;
 
         if (grid[x, y] == null)
         {
-            //instantiate pheromone
-            grid[x, y] = Instantiate(pheromone, gridToWorld(gridPos), Quaternion.identity);
+            if (World.instance.GetTileAt(x, y).type == Tile.Type.Grass || World.instance.GetTileAt(x, y) == null)
+            {
+                //instantiate pheromone
+                grid[x, y] = Instantiate(pheromone, gridToWorld(gridPos), Quaternion.identity);
 
-            PheromoneNode node = grid[x, y].GetComponent<PheromoneNode>();
-            node.setXY(x, y);
-            BoostConcentration(pType, x, y, concentrationMultiplier);
+                PheromoneNode node = grid[x, y].GetComponent<PheromoneNode>();
+                node.setXY(x, y);
+                BoostConcentration(pType, x, y, concentrationMultiplier); 
+            }
+
+                       
         }
 
         //boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
@@ -107,13 +118,12 @@ public class PheromoneGrid : MonoBehaviour
 		int x = (int)gridPos.x;
 		int y = (int)gridPos.y;
 
-		grid [x, y] = Instantiate (genericFood, gridToWorld(gridPos), Quaternion.identity);
-
-        worldFoodPosition = gridToWorld(gridPos);
+		grid [x, y] = Instantiate (genericFood, gridToWorld(gridPos), Quaternion.identity);        
 
         Food node = grid [x, y].GetComponent<Food> ();
 		node.setXY (x, y);
-	}
+        node.worldFoodPosition = worldPos;
+    }
 
 	public void addNest(Vector3 worldPos)
 	{
