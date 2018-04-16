@@ -16,19 +16,36 @@ public class MouseManager : MonoBehaviour
 	Vector3 dragStart;
 	Tile tileSelected;
 
-	// Use this for initialization
-	void Start ()
+    private bool pheromone;
+    private bool food;
+    private bool ant;
+    private bool placeTile;
+
+    protected PheromoneGrid pGrid;
+
+
+    // Use this for initialization
+    void Start ()
 	{
 		tileSelected = new Tile (Tile.Type.Smooth_Stone);
-	}
+        pheromone = false;
+        ant = false;
+        food = false;
+        placeTile = false;
+        pGrid = GameObject.FindWithTag("PGrid").GetComponent<PheromoneGrid>();
+    }
 
-	// Update is called once per frame
-	void Update ()
+    // Update is called once per frame
+    void Update ()
 	{
 
 
 		Vector3 currMousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-		currMousePos = new Vector3 (currMousePos.x + World.instance.halfWidth, currMousePos.y + World.instance.halfHeight, currMousePos.z);
+
+        Vector3 currMousePosAnts = currMousePos;
+
+        currMousePos = new Vector3 (currMousePos.x + World.instance.halfWidth, currMousePos.y + World.instance.halfHeight, currMousePos.z);
+
 
 		//update cursor position
 		Tile tileUnderMouse = GetTileAtWorldCoord (currMousePos);
@@ -47,57 +64,88 @@ public class MouseManager : MonoBehaviour
 		}
 
 
-		// left click mouse click
-		if (Input.GetMouseButtonUp (0)) {
-
-			Tile previousTile = null;
-			int startX = Mathf.FloorToInt (dragStart.x);
-			int endX = Mathf.FloorToInt (currMousePos.x);
-
-			int startY = Mathf.FloorToInt (dragStart.y);
-			int endY = Mathf.FloorToInt (currMousePos.y);
-
-			if (endX < startX) {
-				int temp = endX;
-				endX = startX;
-				startX = temp;
-			}
-			if (endY < startY) {
-				int temp = endY;
-				endY = startY;
-				startY = temp;
-			}
-
-			for (int x = startX; x <= endX; x++) {
-				for (int y = startY; y <= endY; y++) {
-					Tile t = World.instance.GetTileAt (x, y);
-
-					if (t != null) {
-						t.type = tileSelected.type;
-						t.wall = tileSelected.wall;
-					}
-				}
-			}
+        // left click mouse click
+        if (Input.GetMouseButtonUp(0))
+        {
+            Vector3 placement = new Vector3(currMousePosAnts.x - 0.5f, currMousePosAnts.y - 0.5f, 0);
 
 
-			for (int x = startX; x <= endX; x++) {
-				for (int y = startY; y <= endY; y++) {
-					Tile t = World.instance.GetTileAt (x, y);
+            if (pheromone == true)
+            {
+                pGrid.addPheromone(placement, 'S', 1.0f);
+            }
+            else if(food == true)
+            {
+                pGrid.addFood(placement);
+            }
+            else if(ant == true)
+            {
 
-					if (t != null) {
-						if (previousTile == null) {
-							previousTile = t;
-							World.instance.OnTileTypeChange (t.chunkNumber);
-						}
+            }
 
-						if (t.chunkNumber != previousTile.chunkNumber)
-							World.instance.OnTileTypeChange (t.chunkNumber);						
 
-						previousTile = t;
-					}
-				}
-			}
-			World.instance.OnMountainChange ();
+
+
+            else if (placeTile == true)
+            {
+                Tile previousTile = null;
+                int startX = Mathf.FloorToInt(dragStart.x);
+                int endX = Mathf.FloorToInt(currMousePos.x);
+
+                int startY = Mathf.FloorToInt(dragStart.y);
+                int endY = Mathf.FloorToInt(currMousePos.y);
+
+                if (endX < startX)
+                {
+                    int temp = endX;
+                    endX = startX;
+                    startX = temp;
+                }
+                if (endY < startY)
+                {
+                    int temp = endY;
+                    endY = startY;
+                    startY = temp;
+                }
+
+                for (int x = startX; x <= endX; x++)
+                {
+                    for (int y = startY; y <= endY; y++)
+                    {
+                        Tile t = World.instance.GetTileAt(x, y);
+
+                        if (t != null)
+                        {
+                            t.type = tileSelected.type;
+                            t.wall = tileSelected.wall;
+                        }                        
+                    }
+                }
+
+
+                for (int x = startX; x <= endX; x++)
+                {
+                    for (int y = startY; y <= endY; y++)
+                    {
+                        Tile t = World.instance.GetTileAt(x, y);
+
+                        if (t != null)
+                        {
+                            if (previousTile == null)
+                            {
+                                previousTile = t;
+                                World.instance.OnTileTypeChange(t.chunkNumber);
+                            }
+
+                            if (t.chunkNumber != previousTile.chunkNumber)
+                                World.instance.OnTileTypeChange(t.chunkNumber);
+
+                            previousTile = t;
+                        }
+                    }
+                }
+                World.instance.OnMountainChange();
+            }        
 		}
 
 		//screen dragging using middle and right click
@@ -129,18 +177,51 @@ public class MouseManager : MonoBehaviour
 
 
 
-	//BUTTON FUNCTIONALITY
-	public void OnStone ()
+    public void PlacePheromone()
+    {
+        ant = false;
+        pheromone = true;
+        food = false;
+        placeTile = false;
+    }
+
+    public void PlaceFood()
+    {
+        ant = false;
+        pheromone = false;
+        food = true;
+        placeTile = false;
+
+    }
+
+    public void PlaceAnt()
+    {
+
+        ant = true;
+        pheromone = false;
+        food = true;
+        placeTile = false;
+    }
+
+
+
+
+
+    //BUTTON FUNCTIONALITY
+    public void OnStone ()
 	{
 		tileSelected.type = Tile.Type.Smooth_Stone;
+        placeTile = true;
 	}
 
 	public void OnGrass ()
 	{
 		tileSelected.type = Tile.Type.Grass;
-	}
+        placeTile = true;
 
-	public void OnSand ()
+    }
+
+    public void OnSand ()
 	{
 		tileSelected.type = Tile.Type.Sand;
 	}

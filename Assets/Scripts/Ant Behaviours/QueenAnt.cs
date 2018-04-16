@@ -11,7 +11,9 @@ public class QueenAnt : AntClass
 
     private int activeAnts = 0;
     public int activeScouts = 10;
-    int antcounter;
+    public int antcounter;
+
+    public float workerAntSpeed;
 
     // Use this for initialization
     void Start ()
@@ -22,7 +24,7 @@ public class QueenAnt : AntClass
 		antSpeed = 0;
         ants = new List<GameObject>();
 		SpawnAnts();
-
+        workerAntSpeed = 2f;
 
         antcounter = ants.Count;
         Debug.Log(antcounter);
@@ -31,7 +33,7 @@ public class QueenAnt : AntClass
 	// Update is called once per frame
 	void Update ()
 	{
-        for (int i = 0; i <= antcounter; i++)
+        for (int i = 0; i <= antcounter - 1; i++)
         {
             if (activeAnts <= activeScouts)
             {
@@ -39,11 +41,22 @@ public class QueenAnt : AntClass
                 {
                     ants[i].SetActive(true);
                     activeAnts++;
+                    //ants[i].GetComponent<AntClass>().SetAntSpeed(1f);
                 }
 
             }
-        }
 
+            ants[i].GetComponent<AntClass>().SetAntSpeed(workerAntSpeed);
+            //else if (activeAnts >= activeScouts)
+            //{
+            //    if(ants[i].activeSelf == true)
+            //    {
+            //        ants[i].SetActive(false);
+            //        activeAnts--;
+            //    }
+
+            //}
+        }
     }
 
 	void SpawnAnts ()

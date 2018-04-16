@@ -24,7 +24,8 @@ public class AntClass : MonoBehaviour
         SCOUTING,
 		CARRYING,
 		GATHERING,
-        NESTING
+        NESTING,
+        DEBUG
     };
 
 	public AntState state;
@@ -96,10 +97,13 @@ public class AntClass : MonoBehaviour
 		targetPosition = new Vector3 (transform.position.x, transform.position.y, 0f);
 		ResetTargetCheck ();
 
-		if (Random.value > 0f)
-			state = AntState.SCOUTING;
-		else
-			state = AntState.GATHERING;
+        //state = AntState.DEBUG;
+        if(state == AntState.DEBUG)
+        {
+            antSpeed = 2;
+        }
+
+		
 
 		stepped = false;
 	}
@@ -121,7 +125,10 @@ public class AntClass : MonoBehaviour
 
         changeAntColour();
         StateChange();
-        smellingFood = false;       
+        smellingFood = false;
+
+        //Debug.DrawLine(transform.position, transform.position + SmellDirection());
+
     }
 
 
@@ -144,7 +151,7 @@ public class AntClass : MonoBehaviour
                     break;
 
                 case AntState.CARRYING:
-                    SetTarget(SmellDirection() + RandomTarget() * 0.5f + NestDirection() * 0.8f);
+                    SetTarget(SmellDirection() + RandomTarget() * 0.5f + NestDirection() * 0.5f);
                     //Debug.DrawLine(transform.position, transform.position + SmellDirection());
                     break;
 
@@ -152,6 +159,15 @@ public class AntClass : MonoBehaviour
                     SetTarget(SmellDirection() * 1f - NestDirection() * 0.9f);
                     //Debug.DrawLine(transform.position, transform.position - SmellDirection());
                     break;
+
+                case AntState.NESTING:
+                    break;
+
+                case AntState.DEBUG:
+                    SetTarget(SmellDirection());
+                    break;
+
+
             }
             FixTarget(); //....
         }
@@ -171,7 +187,12 @@ public class AntClass : MonoBehaviour
         int gridY = Mathf.RoundToInt(antGridPos.y);
 
         //smellDirection = ants position
-        smellDirection = new Vector3(antGridPos.x, antGridPos.y, 0f);
+
+        //CHANGES HERE
+
+        //smellDirection = new Vector3(antGridPos.x, antGridPos.y, 0f);
+        smellDirection = Vector3.zero;
+
         carryPheromoneCount = 0f;
 
 
@@ -224,13 +245,18 @@ public class AntClass : MonoBehaviour
                             }
                             SmellForFood(x, y);                         
                         }
+                        else if(state == AntState.DEBUG)
+                        {
+                            pherDir.Normalize();
+                            pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration;
+                            smellDirection += pherDir;
+                        }
                     }             
                 }
             }
         }
-
-        //smellDirection = pGrid.gridToWorld (smellDirection);
-        smellDirection.Normalize();
+       
+        smellDirection.Normalize();        
 
         return smellStrength * smellDirection;
     }
@@ -303,6 +329,7 @@ public class AntClass : MonoBehaviour
     //secretes a pheremone where the ant is currently standing
     void secrete ()
     {
+        Vector3 antPosition = new Vector3(transform.position.x - 0.5f, transform.position.y - 0.5f, 0);
 
         if (World.instance.GetTileAt(Mathf.FloorToInt(targetPosition.x + halfWorldWidth), Mathf.FloorToInt(targetPosition.y + halfWorldHeight)).type != Tile.Type.Grass)
         {
@@ -312,7 +339,7 @@ public class AntClass : MonoBehaviour
         {
             if (state == AntState.SCOUTING)
             {
-                pGrid.addPheromone(transform.position, 'S', 1.0f);
+                pGrid.addPheromone(antPosition, 'S', 1.0f);
             }
 
             else if (state == AntState.CARRYING)
@@ -320,11 +347,11 @@ public class AntClass : MonoBehaviour
                 float nestDista = Vector3.Distance(transform.position, pGrid.worldNestPosition);
                 if (nestDista > 5f)
                 {
-                    pGrid.addPheromone(transform.position, 'C', 2.0f);
+                    pGrid.addPheromone(antPosition, 'C', 2.0f);
                 }
                 else
                 {
-                    pGrid.addPheromone(transform.position, 'C', 8f);
+                    pGrid.addPheromone(antPosition, 'C', 8f);
                 }
             }
         }        
@@ -485,6 +512,11 @@ public class AntClass : MonoBehaviour
             if (m_SpriteRenderer.color != Color.magenta)
                 m_SpriteRenderer.color = Color.magenta;
         }
+    }
+
+    public void SetAntSpeed(float _antSpeed)
+    {
+        antSpeed = _antSpeed;
     }
 
 
