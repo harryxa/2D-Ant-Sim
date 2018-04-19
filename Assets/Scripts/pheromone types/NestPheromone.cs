@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NestPheromone : PheromoneNode {
+public class NestPheromone : PheromoneNode
+{
 
 	// Use this for initialization
 	void Start () {

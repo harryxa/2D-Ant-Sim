@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 public class MouseManager : MonoBehaviour
 {
@@ -20,10 +21,12 @@ public class MouseManager : MonoBehaviour
     private bool food;
     private bool ant;
     private bool placeTile;
+    private bool carryP;
+
 
     protected PheromoneGrid pGrid;
 
-
+    
     // Use this for initialization
     void Start ()
 	{
@@ -38,15 +41,10 @@ public class MouseManager : MonoBehaviour
     // Update is called once per frame
     void Update ()
 	{
-
-
-		Vector3 currMousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-
+        Vector3 currMousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
         Vector3 currMousePosAnts = currMousePos;
-
         currMousePos = new Vector3 (currMousePos.x + World.instance.halfWidth, currMousePos.y + World.instance.halfHeight, currMousePos.z);
-
-
+        
 		//update cursor position
 		Tile tileUnderMouse = GetTileAtWorldCoord (currMousePos);
 		if (tileUnderMouse != null) {
@@ -58,6 +56,9 @@ public class MouseManager : MonoBehaviour
 		} else {
 			cursor.SetActive (false);
 		}
+
+
+        //if over ui bail out
 
 		if (Input.GetMouseButtonDown (0)) {
 			dragStart = currMousePos;
@@ -72,7 +73,7 @@ public class MouseManager : MonoBehaviour
 
             if (pheromone == true)
             {
-                pGrid.addPheromone(placement, PheromoneGrid.PheromoneType.NEGATIVE, 1.0f);
+                pGrid.addPheromone(placement, PheromoneGrid.PheromoneType.STANDARD, 1.0f);
             }
             else if(food == true)
             {
@@ -81,6 +82,10 @@ public class MouseManager : MonoBehaviour
             else if(ant == true)
             {
 
+            }
+            else if(carryP == true)
+            {
+                pGrid.addPheromone(placement, PheromoneGrid.PheromoneType.CARRYING, 3f);
             }
 
 
@@ -165,9 +170,7 @@ public class MouseManager : MonoBehaviour
 
 	}
 
-
-
-	Tile GetTileAtWorldCoord (Vector3 coord)
+    Tile GetTileAtWorldCoord (Vector3 coord)
 	{
 		int x = Mathf.FloorToInt (coord.x);
 		int y = Mathf.FloorToInt (coord.y);
@@ -183,6 +186,7 @@ public class MouseManager : MonoBehaviour
         pheromone = true;
         food = false;
         placeTile = false;
+        carryP = false;
     }
 
     public void PlaceFood()
@@ -191,16 +195,24 @@ public class MouseManager : MonoBehaviour
         pheromone = false;
         food = true;
         placeTile = false;
-
+        carryP = false;
     }
 
     public void PlaceAnt()
     {
-
         ant = true;
         pheromone = false;
-        food = true;
+        food = false;
         placeTile = false;
+        carryP = false;
+    }
+    public void PlaceCarryP()
+    {
+        ant = false;
+        pheromone = false;
+        food = false;
+        placeTile = false;
+        carryP = true;
     }
 
 

@@ -10,8 +10,7 @@ public class QueenAnt : AntClass
 	public int antCount;
 
     private int activeAnts = 0;
-    public int activeScouts = 10;
-    public int antcounter;
+    public int numberOfScouts;
 
     public float workerAntSpeed;
 
@@ -26,39 +25,37 @@ public class QueenAnt : AntClass
 		SpawnAnts();
         workerAntSpeed = 2f;
 
-        antcounter = ants.Count;
-        Debug.Log(antcounter);
     }
 	
 	// Update is called once per frame
 	void Update ()
 	{
-        for (int i = 0; i <= antcounter - 1; i++)
+        for (int i = 0; i <= ants.Count - 1; i++)
         {
-            if (activeAnts <= activeScouts)
+            if (activeAnts < numberOfScouts)
             {
                 if (ants[i].activeSelf == false)
                 {
                     ants[i].SetActive(true);
                     activeAnts++;
-                    //ants[i].GetComponent<AntClass>().SetAntSpeed(1f);
                 }
-
             }
 
-            else if (activeAnts >= activeScouts)
+            else if (activeAnts > numberOfScouts)
             {
                 if (ants[i].activeSelf == true)
                 {
-                    if(ants[i].GetComponent<AntClass>().state == AntState.NESTING)
+                    if(ants[i].GetComponent<AntClass>().state == AntState.NESTING && ants[i].GetComponent<AntClass>().nesting == true)
                     {
+                        ants[i].GetComponent<AntClass>().state = AntState.SCOUTING;
+                        ants[i].GetComponent<AntClass>().nesting = false;
                         ants[i].SetActive(false);
                         activeAnts--;
                     }
                 }
 
             }
-
+            
             ants[i].GetComponent<AntClass>().SetAntSpeed(workerAntSpeed);
            // ants[i].GetComponent<AntClass>().setSecrete();
 
