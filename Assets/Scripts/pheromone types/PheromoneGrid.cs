@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class PheromoneGrid : MonoBehaviour 
 {
-	
+    
+
+
 	private float worldWidth = 100;
 	private float worldHeight = 100;
 	private int gridHeight = 100;
@@ -15,15 +17,24 @@ public class PheromoneGrid : MonoBehaviour
 	public Transform pheromone;
 	public Transform genericFood;
 	public Transform nest;
-	public Transform carryPheromone;
 
     public Vector3 worldNestPosition;
-	// Use this for initialization
-	void Start () 
+
+    public enum PheromoneType
+    {
+        STANDARD,
+        NEGATIVE,
+        CARRYING
+    }
+
+    public PheromoneType pType;
+
+    // Use this for initialization
+    void Start () 
 	{
 		//grid can range from 0 to 10, so + 1
 		grid = new Transform[gridWidth + 1, gridHeight + 1];
-        
+
     }
 
     // Update is called once per frame
@@ -32,8 +43,7 @@ public class PheromoneGrid : MonoBehaviour
 
     }
 
-    //TODO: add various types of pheromones
-	public void addPheromone(Vector3 worldPos, char pType, float concentrationMultiplier)
+    public void addPheromone(Vector3 worldPos, PheromoneType _pType, float concentrationMultiplier)
 	{
 		Vector3 gridPos = worldToGrid (worldPos);
 		gridPos.x = Mathf.RoundToInt(gridPos.x);
@@ -56,59 +66,31 @@ public class PheromoneGrid : MonoBehaviour
 
                 PheromoneNode node = grid[x, y].GetComponent<PheromoneNode>();
                 node.setXY(x, y);
-                BoostConcentration(pType, x, y, concentrationMultiplier); 
-            }
-
-                       
+                BoostConcentration(_pType, x, y, concentrationMultiplier); 
+            }                       
         }
 
         //boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
 		else
 		{
-            BoostConcentration(pType, x, y, concentrationMultiplier);
+            BoostConcentration(_pType, x, y, concentrationMultiplier);
         }
     }
 
-    private void BoostConcentration(char pType, int x, int y, float multiplier)
+    //boost varying types of pheromone nodes
+    private void BoostConcentration(PheromoneType _pType, int x, int y, float multiplier)
     {
-        if (pType == 'S')
+        if (_pType == PheromoneType.STANDARD)
             grid[x, y].GetComponent<PheromoneNode>().boostStandardConc();
 
-        else if (pType == 'C')
+        else if (_pType == PheromoneType.CARRYING)
             grid[x, y].GetComponent<PheromoneNode>().boostCarryConc(multiplier);
+
+        else if (_pType == PheromoneType.NEGATIVE)
+        {
+            grid[x, y].GetComponent<PheromoneNode>().boostNegativeConc();
+        }
     }
-
-//	public void addCarryingPheromone(Vector3 worldPos)
-//	{
-//		Vector3 gridPos = worldToGrid (worldPos);
-//		gridPos.x = Mathf.RoundToInt(gridPos.x);
-//		gridPos.y = Mathf.RoundToInt(gridPos.y);
-//		int x = (int)gridPos.x;
-//		int y = (int)gridPos.y;
-//
-//        if (grid[x, y] == null)
-//        {
-//            //instantiate pheromone
-//            grid[x, y] = Instantiate(carryPheromone, gridToWorld(gridPos), Quaternion.identity);
-//
-//            CarryingPheromone node = grid[x, y].GetComponent<CarryingPheromone>();
-//            node.setXY(x, y);
-//        }
-//        else if (grid[x,y].GetComponent<PheromoneNode>().GetType() == (new PheromoneNode()).GetType())
-//        {
-//            grid[x, y].GetComponent<PheromoneNode>().concentration = 0f;
-//        }
-//
-//        //boost concentration of existing pheromone // ### Is instantiating an object too slow? ###        
-//        else if (grid[x, y].GetComponent<CarryingPheromone>().GetType() == (new CarryingPheromone()).GetType())
-//         {
-//            grid[x, y].GetComponent<CarryingPheromone>().boostConc();
-//         }
-//
-//        //instantiate new pheromone node
-//
-//    }
-
 
     public void addFood(Vector3 worldPos)
 	{		
@@ -169,11 +151,6 @@ public class PheromoneGrid : MonoBehaviour
 		return gridPos;
 	}
 
-	// need to change AntClass's bounding box to this eventually
-//	public Vector3 wrapWorldCoord(Vector3 worldPos)
-//	{
-//
-//	}
 
 	public float getWorldWidth()
 	{		
@@ -184,4 +161,9 @@ public class PheromoneGrid : MonoBehaviour
 	{
 		return worldHeight;
 	}
+
+
+
+
+    
 }

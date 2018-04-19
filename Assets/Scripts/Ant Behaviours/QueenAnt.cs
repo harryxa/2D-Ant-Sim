@@ -46,22 +46,28 @@ public class QueenAnt : AntClass
 
             }
 
-            ants[i].GetComponent<AntClass>().SetAntSpeed(workerAntSpeed);
-            //else if (activeAnts >= activeScouts)
-            //{
-            //    if(ants[i].activeSelf == true)
-            //    {
-            //        ants[i].SetActive(false);
-            //        activeAnts--;
-            //    }
+            else if (activeAnts >= activeScouts)
+            {
+                if (ants[i].activeSelf == true)
+                {
+                    if(ants[i].GetComponent<AntClass>().state == AntState.NESTING)
+                    {
+                        ants[i].SetActive(false);
+                        activeAnts--;
+                    }
+                }
 
-            //}
+            }
+
+            ants[i].GetComponent<AntClass>().SetAntSpeed(workerAntSpeed);
+           // ants[i].GetComponent<AntClass>().setSecrete();
+
         }
     }
 
 	void SpawnAnts ()
 	{
-		for(int i = 0; i <= antCount; i++)
+		for(int i = 0; i < antCount; i++)
         {
             GameObject ant = Instantiate(workerAnt, transform.position, Quaternion.Euler(0, 0, Random.value * 360));
             ants.Add(ant);

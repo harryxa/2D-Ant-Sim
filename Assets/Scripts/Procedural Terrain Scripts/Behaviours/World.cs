@@ -52,7 +52,7 @@ public class World : MonoBehaviour
 	public float cobbleEndHeight;
 	public float mountainStartHeight;
 
-	void Awake ()
+    void Awake ()
 	{
 		if (instance != null) {
 			Debug.Log ("more instances of world, why?");
@@ -85,9 +85,9 @@ public class World : MonoBehaviour
 		SubdivideTilesArray (); 
 
 		SubdivideMountainArray ();
-	}
+    }
 
-	void Update ()
+    void Update ()
 	{
 		if (randomiseMap == true) 
 		{
@@ -101,8 +101,10 @@ public class World : MonoBehaviour
 		}
 	}
 
-	//Create an array of tiles with a type
-	void CreateTile ()
+
+
+    //Create an array of tiles with a type
+    void CreateTile ()
 	{
 		tiles = new Tile[width, height];
 

@@ -72,7 +72,7 @@ public class MouseManager : MonoBehaviour
 
             if (pheromone == true)
             {
-                pGrid.addPheromone(placement, 'S', 1.0f);
+                pGrid.addPheromone(placement, PheromoneGrid.PheromoneType.NEGATIVE, 1.0f);
             }
             else if(food == true)
             {

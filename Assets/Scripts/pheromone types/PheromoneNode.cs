@@ -9,7 +9,7 @@ public class PheromoneNode : MonoBehaviour
 	private float defaultConc = 5f;
 	private float maxConc = 100f;
 
-	protected float evaporationRate = 0.08f;
+	protected float evaporationRate = 0.5f;
 	protected float defaultScale = 0.1f;
 
 	//public bool exists = true;
@@ -20,6 +20,8 @@ public class PheromoneNode : MonoBehaviour
 	public float pheromoneConcentration = 0f;
 	public float nestConcentration = 0f;
 	public float carryConcentration = 0f;
+    public float negativePheromone = 0f;
+
 
 
     void Awake()
@@ -44,7 +46,12 @@ public class PheromoneNode : MonoBehaviour
 		pheromoneConcentration += defaultConc;
 	}
 
-	public void boostCarryConc(float multiplier) 
+    public void boostNegativeConc()
+    {
+        negativePheromone += defaultConc;
+    }
+
+    public void boostCarryConc(float multiplier) 
 	{
 		carryConcentration += defaultConc * multiplier;
 	}
