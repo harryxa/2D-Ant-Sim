@@ -28,7 +28,7 @@ public class Food : PheromoneNode
         }
     }
 
-    public void reduceFoodAmount()
+    public void ReduceFoodAmount()
     {
         //STANDARD PHEROMONE
         if (pheromoneConcentration > 0f)

@@ -43,7 +43,7 @@ public class PheromoneGrid : MonoBehaviour
 
     }
 
-    public void addPheromone(Vector3 worldPos, PheromoneType _pType, float concentrationMultiplier)
+    public void AddPheromone(Vector3 worldPos, PheromoneType _pType, float concentrationMultiplier)
 	{
 		Vector3 gridPos = worldToGrid (worldPos);
 		gridPos.x = Mathf.RoundToInt(gridPos.x);

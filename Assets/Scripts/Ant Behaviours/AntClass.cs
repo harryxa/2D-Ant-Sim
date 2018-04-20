@@ -62,7 +62,7 @@ public class AntClass : MonoBehaviour
 	protected bool leftNext;
 	protected int leftTurnsTried = 0;
 	protected int rightTurnsTried = 0;
-	protected float turningAngle = 0.5f;
+	protected float turningAngle = 0.05f;
 	protected float angleMultiplier = 1.1f;
 
     //FOOD RELATED SUCH AND SUCH
@@ -167,7 +167,9 @@ public class AntClass : MonoBehaviour
                     break;
 
                 case AntState.CARRYING:
-                    target = SmellDirection() + RandomTarget() + NestDirection();
+                    target = SmellDirection() + RandomTarget() + (NestDirection() );
+
+                    //target = SmellDirection() + NestDirection();
                     target.Normalize();
                     SetTarget(target);
                     //Debug.DrawLine(transform.position, transform.position + SmellDirection());
@@ -252,7 +254,7 @@ public class AntClass : MonoBehaviour
                             {
                                 debugcarrycount += pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
 
-                                if(debugcarrycount < 200)
+                                if(debugcarrycount < 400)
                                 {
                                     pherDir.Normalize();
                                     pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration;
@@ -307,7 +309,7 @@ public class AntClass : MonoBehaviour
         if(state == AntState.COLLECTINGFOOD)
         {
             carryingFood = true;
-            foodItem.reduceFoodAmount();
+            foodItem.ReduceFoodAmount();
             state = AntState.CARRYING;
             hunger = 100;          
         }
@@ -390,6 +392,7 @@ public class AntClass : MonoBehaviour
         }
     }
 
+    //vector pointing towards the nest
     public Vector3 NestDirection()
     {
         Vector3 targetpos = Vector3.zero;
@@ -419,7 +422,7 @@ public class AntClass : MonoBehaviour
         {
             if (state == AntState.SCOUTING)
             {
-                pGrid.addPheromone(antPosition, PheromoneGrid.PheromoneType.STANDARD, 1.0f);
+                pGrid.AddPheromone(antPosition, PheromoneGrid.PheromoneType.STANDARD, 1.0f);
             }
 
             else if (state == AntState.CARRYING)
@@ -427,12 +430,12 @@ public class AntClass : MonoBehaviour
                 float nestDista = Vector3.Distance(transform.position, pGrid.worldNestPosition);
                 if (nestDista > 5f)
                 {
-                    pGrid.addPheromone(antPosition, PheromoneGrid.PheromoneType.CARRYING, 2.0f);
+                    pGrid.AddPheromone(antPosition, PheromoneGrid.PheromoneType.CARRYING, 2.0f);
                 }
                 //else add more if close to nest, want to draw ant sou tof the nest
                 else
                 {
-                    pGrid.addPheromone(antPosition, PheromoneGrid.PheromoneType.CARRYING, 8f);
+                    pGrid.AddPheromone(antPosition, PheromoneGrid.PheromoneType.CARRYING, 8f);
                 }
             }
         }        
@@ -503,9 +506,10 @@ public class AntClass : MonoBehaviour
             else
 				turnsTried = rightTurnsTried;
 
-			float angle = turningAngle * Mathf.Pow (angleMultiplier, turnsTried - 1);
+            //float angle = turningAngle * Mathf.Pow (angleMultiplier, turnsTried - 1);
+            float angle = turningAngle * turnsTried;
 
-			if (!leftNext)
+            if (!leftNext)
 				angle *= -1;
 
 			Quaternion r = Quaternion.Euler (0, 0, angle);	
@@ -593,8 +597,13 @@ public class AntClass : MonoBehaviour
         }
         else if(state == AntState.GATHERING)
         {
-            if (m_SpriteRenderer.color != Color.magenta)
-                m_SpriteRenderer.color = Color.magenta;
+            if (m_SpriteRenderer.color != Color.cyan)
+                m_SpriteRenderer.color = Color.cyan;
+        }
+        else if (state == AntState.NESTING)
+        {
+            if (m_SpriteRenderer.color != Color.grey)
+                m_SpriteRenderer.color = Color.grey;
         }
     }
 

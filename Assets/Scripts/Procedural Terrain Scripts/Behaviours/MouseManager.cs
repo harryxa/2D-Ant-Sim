@@ -73,7 +73,7 @@ public class MouseManager : MonoBehaviour
 
             if (pheromone == true)
             {
-                pGrid.addPheromone(placement, PheromoneGrid.PheromoneType.STANDARD, 1.0f);
+                pGrid.AddPheromone(placement, PheromoneGrid.PheromoneType.STANDARD, 1.0f);
             }
             else if(food == true)
             {
@@ -85,7 +85,7 @@ public class MouseManager : MonoBehaviour
             }
             else if(carryP == true)
             {
-                pGrid.addPheromone(placement, PheromoneGrid.PheromoneType.CARRYING, 3f);
+                pGrid.AddPheromone(placement, PheromoneGrid.PheromoneType.CARRYING, 3f);
             }
 
 

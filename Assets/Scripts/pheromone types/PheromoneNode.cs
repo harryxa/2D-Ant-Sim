@@ -9,7 +9,7 @@ public class PheromoneNode : MonoBehaviour
 	private float defaultConc = 5f;
 	private float maxConc = 100f;
 
-	protected float evaporationRate = 0.5f;
+	protected float evaporationRate = 0.2f;
 	protected float defaultScale = 0.1f;
 
 	//public bool exists = true;
