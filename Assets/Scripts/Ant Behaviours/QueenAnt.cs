@@ -93,6 +93,11 @@ public class QueenAnt : AntClass
         }
     }
 
+    public void ReleaseGatherers()
+    {
+        //the stronger the pheromone count the more ants get released
+    }
+
     
 
 	void SpawnAnts ()
