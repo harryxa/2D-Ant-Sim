@@ -43,10 +43,10 @@ public class AntClass : MonoBehaviour
 	protected float rotateSpeed = 20f;
 
 	//bounding box floats
-	float worldHeight;
-	float worldWidth;
-	float halfWorldHeight;
-	float halfWorldWidth;
+	protected float worldHeight;
+    protected float worldWidth;
+    protected float halfWorldHeight;
+    protected float halfWorldWidth;
 
 	//Vector3 nextPosition;
 	public float antSpeed = 20f;
@@ -139,7 +139,7 @@ public class AntClass : MonoBehaviour
         StateActions();
         smellingFood = false;
         CollectingFood();
-        hunger -= 1 * Time.deltaTime;
+        hunger -= 0.5f * Time.deltaTime;
         Hunger();
         //Debug.DrawLine(transform.position, transform.position + SmellDirection());
     }
@@ -274,6 +274,8 @@ public class AntClass : MonoBehaviour
                                 pherDir.Normalize();
                                 pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
                                 smellDirection += pherDir;
+
+                                //value to determine 
                                 carryPheromoneCount += pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
                             }
                             SmellForFood(x, y);                         
@@ -306,7 +308,8 @@ public class AntClass : MonoBehaviour
         {
             carryingFood = true;
             foodItem.reduceFoodAmount();
-            state = AntState.CARRYING;            
+            state = AntState.CARRYING;
+            hunger = 100;          
         }
     }
 
@@ -326,7 +329,9 @@ public class AntClass : MonoBehaviour
         {
             case AntState.SCOUTING:
 
-                if(smellingFood == true)
+                nesting = false;
+
+                if (smellingFood == true)
                 {
                     //set state to carry
                     if (TargetReached(foodPosition, 2f))
@@ -369,9 +374,17 @@ public class AntClass : MonoBehaviour
 
             case AntState.NESTING:
                 targetdest = pGrid.worldNestPosition;
+
                 if (TargetReached(targetdest, 2f))
                 {
-                    nesting = true;                    
+                    nesting = true;
+                    hunger += 10 * Time.deltaTime;
+
+                    if (hunger > 90)
+                    {
+                        nesting = false;
+                        state = AntState.SCOUTING;
+                    }
                 }
                 break;
         }
