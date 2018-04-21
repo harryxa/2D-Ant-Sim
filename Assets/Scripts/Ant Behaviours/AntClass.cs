@@ -55,7 +55,7 @@ public class AntClass : MonoBehaviour
 	protected int limiti;
 
 	//SMELLING VARIABLES
-	private int smellRadius = 6;
+	private int smellRadius = 3;
 	private float smellStrength = 1f;
 
     //WALL AVOIDANCE
@@ -217,6 +217,7 @@ public class AntClass : MonoBehaviour
 
         //smellDirection = new Vector3(antGridPos.x, antGridPos.y, 0f);
         smellDirection = Vector3.zero;
+        Vector3 negDir = Vector3.zero;
 
         carryPheromoneCount = 0f;
         debugcarrycount = 0f;
@@ -235,6 +236,14 @@ public class AntClass : MonoBehaviour
                 {                    
                     if (pGrid.grid[x, y] != null)
                     {
+
+                        //always smell negative pheromones
+                        negDir = pherDir;
+                        negDir.Normalize();
+                        negDir = - negDir * pGrid.grid[x, y].GetComponent<PheromoneNode>().negativeConcentration;
+
+
+
                         //if WANDERING smell for food and randomly wander around the map
                         //set state to carry if food found                        
                         if (state == AntState.SCOUTING)
@@ -294,11 +303,14 @@ public class AntClass : MonoBehaviour
                             pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration;
                             smellDirection += pherDir;
                         }
-                    }             
+
+                        smellDirection += negDir;
+
+                    }
                 }
             }
         }
-       
+
         smellDirection.Normalize();        
 
         return smellStrength * smellDirection;
@@ -414,7 +426,8 @@ public class AntClass : MonoBehaviour
     {
         Vector3 antPosition = new Vector3(transform.position.x - 0.5f, transform.position.y - 0.5f, 0);
 
-        if (World.instance.GetTileAt(Mathf.FloorToInt(targetPosition.x + halfWorldWidth), Mathf.FloorToInt(targetPosition.y + halfWorldHeight)).type != Tile.Type.Grass)
+        if (World.instance.GetTileAt(Mathf.FloorToInt(targetPosition.x + halfWorldWidth), 
+            Mathf.FloorToInt(targetPosition.y + halfWorldHeight)).type != Tile.Type.Grass)
         {
             return;
         }

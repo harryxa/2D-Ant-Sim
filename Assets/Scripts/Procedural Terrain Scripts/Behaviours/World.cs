@@ -51,6 +51,7 @@ public class World : MonoBehaviour
 	float cobbleStartHeight;
 	public float cobbleEndHeight;
 	public float mountainStartHeight;
+    //public GameObject pheromoneGrid;
 
     void Awake ()
 	{
@@ -85,20 +86,25 @@ public class World : MonoBehaviour
 		SubdivideTilesArray (); 
 
 		SubdivideMountainArray ();
+
+        //pheromoneGrid = new GameObject("Pheromone Grid");
+        //PheromoneGrid pheromoneGridScript = pheromoneGrid.AddComponent<PheromoneGrid>();
+        //pheromoneGrid.tag = "PGrid";
+        if (randomiseMap == true)
+        {
+            RandomizeMap();
+            randomiseMap = false;
+        }
+        if (squareMap == true)
+        {
+            SquareMap();
+            squareMap = false;
+        }
     }
 
     void Update ()
 	{
-		if (randomiseMap == true) 
-		{
-			RandomizeMap ();
-			randomiseMap = false;
-		}
-		if (squareMap == true) 
-		{
-			SquareMap ();
-			squareMap = false;
-		}
+		
 	}
 
 

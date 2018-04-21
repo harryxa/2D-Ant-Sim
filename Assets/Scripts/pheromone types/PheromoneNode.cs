@@ -18,9 +18,9 @@ public class PheromoneNode : MonoBehaviour
 
     //PHEROMONE TYPES
 	public float pheromoneConcentration = 0f;
-	public float nestConcentration = 0f;
-	public float carryConcentration = 0f;
-    public float negativePheromone = 0f;
+    public float nestConcentration = 0f;
+    public float carryConcentration = 0f;
+    public float negativeConcentration = 0f;
 
 
 
@@ -32,38 +32,39 @@ public class PheromoneNode : MonoBehaviour
 
     void Start () 
 	{
-		
+
+
     }
 
     void Update () 
 	{
-		reducePheromoneConcentration ();
-        changePheromoneColour();
+		ReducePheromoneConcentration ();
+        ChangePheromoneColour();
     }
 
-	public void boostStandardConc() 
+	public void BoostStandardConc(float multiplier) 
 	{
-		pheromoneConcentration += defaultConc;
+		pheromoneConcentration += defaultConc * multiplier;
 	}
 
-    public void boostNegativeConc()
+    public void BoostNegativeConc(float multiplier)
     {
-        negativePheromone += defaultConc;
+        negativeConcentration += defaultConc * multiplier;
     }
 
-    public void boostCarryConc(float multiplier) 
+    public void BoostCarryConc(float multiplier) 
 	{
 		carryConcentration += defaultConc * multiplier;
 	}
 
-    public void setXY(int x, int y)
+    public void SetXY(int x, int y)
     {
         gridX = x;
         gridY = y;
     }
 
     //reduces all pheromone concentrations
-	public void reducePheromoneConcentration()
+	public void ReducePheromoneConcentration()
 	{
         //STANDARD PHEROMONE
 		if (pheromoneConcentration > 0f) 
@@ -80,7 +81,7 @@ public class PheromoneNode : MonoBehaviour
             }
 		}
         //CARRY PHEROMONE
-		if (carryConcentration > 0f) 
+		else if (carryConcentration > 0f) 
 		{
 			if (carryConcentration > maxConc)
 				carryConcentration = maxConc;
@@ -93,13 +94,13 @@ public class PheromoneNode : MonoBehaviour
                 transform.localScale = new Vector3(scale, scale, scale);
             }
 		}
-		else
+		else if (negativeConcentration > 0)
 		{
-			//Destroy(gameObject);
+            transform.localScale = new Vector3(1f, 1f, 1f);
 		}
 	}
 
-    public void changePheromoneColour()
+    public void ChangePheromoneColour()
     {
         if(pheromoneConcentration > carryConcentration)
         {
@@ -110,6 +111,11 @@ public class PheromoneNode : MonoBehaviour
         {
             if (m_spriteRenderer.color != Color.blue)
                 m_spriteRenderer.color = Color.blue;
+        }
+        else if (negativeConcentration > 1)
+        {
+            if (m_spriteRenderer.color != Color.black)
+                m_spriteRenderer.color = Color.black;
         }
     }
 

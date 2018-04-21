@@ -20,6 +20,8 @@ public class PheromoneGrid : MonoBehaviour
 
     public Vector3 worldNestPosition;
 
+    
+
     public enum PheromoneType
     {
         STANDARD,
@@ -32,8 +34,18 @@ public class PheromoneGrid : MonoBehaviour
     // Use this for initialization
     void Start () 
 	{
-		//grid can range from 0 to 10, so + 1
-		grid = new Transform[gridWidth + 1, gridHeight + 1];
+
+        //grid can range from 0 to 10, so + 1
+        grid = new Transform[gridWidth + 1, gridHeight + 1];
+
+        Debug.Log(World.instance.GetTileAt(0, 0).type);
+
+        InitialisePheromones();
+
+    }
+
+    private void Awake()
+    {
 
     }
 
@@ -41,6 +53,27 @@ public class PheromoneGrid : MonoBehaviour
     void Update () 
 	{
 
+    }
+
+    private void InitialisePheromones()
+    {
+        for (int x = 0; x < gridWidth + 1; x++)
+        {
+            for (int y = 0; y < gridHeight + 1; y++)
+            {
+                //TODO hacky grid displacement
+                //grid[x, y] = Instantiate(pheromone, gridToWorld(new Vector3(x + 0.5f, y + 0.5f,0)), Quaternion.identity);
+
+                AddPheromone(gridToWorld(new Vector3(x, y, 0)), PheromoneType.STANDARD, 0f);
+
+                //this may brake when world and grid made properly
+                if (World.instance.GetTileAt(x, y).type != Tile.Type.Grass)
+                {
+                    BoostConcentration(PheromoneType.NEGATIVE, x, y, 100f);
+                }
+                //Debug.Log(World.instance.GetTileAt(x, y).type);
+            }
+        }
     }
 
     public void AddPheromone(Vector3 worldPos, PheromoneType _pType, float concentrationMultiplier)
@@ -59,13 +92,13 @@ public class PheromoneGrid : MonoBehaviour
 
         if (grid[x, y] == null)
         {
-            if (World.instance.GetTileAt(x, y).type == Tile.Type.Grass || World.instance.GetTileAt(x, y) == null)
+            if (true || World.instance.GetTileAt(x, y).type == Tile.Type.Grass || World.instance.GetTileAt(x, y) == null)
             {
                 //instantiate pheromone
                 grid[x, y] = Instantiate(pheromone, gridToWorld(gridPos), Quaternion.identity);
 
                 PheromoneNode node = grid[x, y].GetComponent<PheromoneNode>();
-                node.setXY(x, y);
+                node.SetXY(x, y);
                 BoostConcentration(_pType, x, y, concentrationMultiplier); 
             }                       
         }
@@ -81,14 +114,14 @@ public class PheromoneGrid : MonoBehaviour
     private void BoostConcentration(PheromoneType _pType, int x, int y, float multiplier)
     {
         if (_pType == PheromoneType.STANDARD)
-            grid[x, y].GetComponent<PheromoneNode>().boostStandardConc();
+            grid[x, y].GetComponent<PheromoneNode>().BoostStandardConc(multiplier);
 
         else if (_pType == PheromoneType.CARRYING)
-            grid[x, y].GetComponent<PheromoneNode>().boostCarryConc(multiplier);
+            grid[x, y].GetComponent<PheromoneNode>().BoostCarryConc(multiplier);
 
         else if (_pType == PheromoneType.NEGATIVE)
         {
-            grid[x, y].GetComponent<PheromoneNode>().boostNegativeConc();
+            grid[x, y].GetComponent<PheromoneNode>().BoostNegativeConc(multiplier);
         }
     }
 
@@ -103,7 +136,7 @@ public class PheromoneGrid : MonoBehaviour
 		grid [x, y] = Instantiate (genericFood, gridToWorld(gridPos), Quaternion.identity);        
 
         Food node = grid [x, y].GetComponent<Food> ();
-		node.setXY (x, y);
+		node.SetXY (x, y);
         node.worldFoodPosition = worldPos;
     }
 
@@ -122,7 +155,7 @@ public class PheromoneGrid : MonoBehaviour
         worldNestPosition = gridToWorld(gridPos);
 
         NestPheromone node = grid [x, y].GetComponent<NestPheromone> ();
-		node.setXY (x, y);
+		node.SetXY (x, y);
 	}
 
 	public Vector3 gridToWorld(Vector3 gridPos) 
