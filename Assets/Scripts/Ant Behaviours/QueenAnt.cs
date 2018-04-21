@@ -18,16 +18,25 @@ public class QueenAnt : AntClass
     // Use this for initialization
     void Start ()
 	{
+
 		this.pGrid = GameObject.FindWithTag("PGrid").GetComponent<PheromoneGrid>();
 
-		this.pGrid.addNest (transform.position);
-		antSpeed = 0;
+        halfWorldHeight = pGrid.getWorldHeight() / 2;
+        halfWorldWidth = pGrid.getWorldWidth() / 2;
+
+        worldHeight = pGrid.getWorldHeight();
+        worldWidth = pGrid.getWorldWidth();
+
+        PlaceQueen();
+        this.pGrid.addNest(transform.position);
+        antSpeed = 0;
         ants = new List<GameObject>();
 		SpawnAnts();
         workerAntSpeed = 2f;
         state = AntState.GATHERING;
         worldHeight = pGrid.getWorldHeight();
         worldWidth = pGrid.getWorldWidth();
+
     }
 	
 	// Update is called once per frame
@@ -63,6 +72,24 @@ public class QueenAnt : AntClass
         }
     }
 
+    private void PlaceQueen()
+    {
+        
+        while (!PositionSafe(transform.position))
+            transform.position = new Vector3(Random.Range(-halfWorldWidth, halfWorldWidth),
+                                             Random.Range(-halfWorldHeight, halfWorldHeight),
+                                             0f);
+    }
+
+    private bool PositionSafe(Vector3 worldPosition)
+    {
+        Vector3 gridPosition = pGrid.worldToGrid(worldPosition);
+        int x = Mathf.FloorToInt(gridPosition.x);
+        int y = Mathf.FloorToInt(gridPosition.y);
+
+        return (World.instance.GetTileAt(x, y).type == Tile.Type.Grass);
+    }
+
     //smell for carry pheromones
     private void SmellPheromone()
     {
@@ -73,7 +100,7 @@ public class QueenAnt : AntClass
 
         int smellRadius = 7;
         carryPheromoneCount = 0f;
-        debugcarrycount = 0f;
+        CarryCount = 0f;
        
         for (int x = gridX - smellRadius; x <= gridX + smellRadius; x++)
         {

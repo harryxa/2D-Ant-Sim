@@ -55,14 +55,14 @@ public class AntClass : MonoBehaviour
 	protected int limiti;
 
 	//SMELLING VARIABLES
-	private int smellRadius = 3;
+	private int smellRadius = 6;
 	private float smellStrength = 1f;
 
     //WALL AVOIDANCE
 	protected bool leftNext;
 	protected int leftTurnsTried = 0;
 	protected int rightTurnsTried = 0;
-	protected float turningAngle = 0.05f;
+	protected float turningAngle = 1f;
 	protected float angleMultiplier = 1.1f;
 
     //FOOD RELATED SUCH AND SUCH
@@ -83,7 +83,9 @@ public class AntClass : MonoBehaviour
     public bool nesting;
 
 
-    public float debugcarrycount = 0f;
+    public float CarryCount = 0f;
+
+    public int debugSmellCount = 0;
 
     void Start ()
 	{
@@ -112,6 +114,7 @@ public class AntClass : MonoBehaviour
         {
             antSpeed = 2;
         }
+        //state = AntState.DEBUG;
 
         hunger = Random.Range(50, 100);
 
@@ -220,7 +223,7 @@ public class AntClass : MonoBehaviour
         Vector3 negDir = Vector3.zero;
 
         carryPheromoneCount = 0f;
-        debugcarrycount = 0f;
+        CarryCount = 0f;
 
         //loops through grid in square shape around ant
         //creates a vector, pherDir, from the ant to the node on the grid
@@ -236,12 +239,17 @@ public class AntClass : MonoBehaviour
                 {                    
                     if (pGrid.grid[x, y] != null)
                     {
-
-                        //always smell negative pheromones
+                        //debugSmellCount++;
+                        ////always smell negative pheromones
                         negDir = pherDir;
                         negDir.Normalize();
-                        negDir = - negDir * pGrid.grid[x, y].GetComponent<PheromoneNode>().negativeConcentration;
-
+                        negDir *= -pGrid.grid[x, y].GetComponent<PheromoneNode>().negativeConcentration;
+                        //if (debugSmellCount % 1000 == 0 &&
+                        //pGrid.grid[x, y].GetComponent<PheromoneNode>().negativeConcentration > 0.01f )
+                        //{
+                        // Debug.Log(pherDir.x + ", " + pherDir.y + ", " + pherDir.z + " || " + 
+                        //  negDir.x + ", " + negDir.y + ", " + negDir.z);
+                        // }
 
 
                         //if WANDERING smell for food and randomly wander around the map
@@ -259,11 +267,12 @@ public class AntClass : MonoBehaviour
                         //if CARRYING, head home
                         else if (state == AntState.CARRYING)
                         {
-                            if (pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration >= 1 || pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration >= 1)
+                            if (pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration >= 1 ||
+                                pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration >= 1)
                             {
-                                debugcarrycount += pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
+                                CarryCount += pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
 
-                                if(debugcarrycount < 400)
+                                if(CarryCount < 400)
                                 {
                                     pherDir.Normalize();
                                     pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration;
@@ -272,7 +281,9 @@ public class AntClass : MonoBehaviour
                                 else
                                 {
                                     pherDir.Normalize();
-                                    pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration + pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
+                                    pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration +
+                                        pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
+
                                     smellDirection += pherDir;
                                 }
                             }
@@ -294,14 +305,14 @@ public class AntClass : MonoBehaviour
                         else if(state == AntState.NESTING)
                         {
                             pherDir.Normalize();
-                            pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration + pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
+                            pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration + 
+                                pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
+
                             smellDirection += pherDir;
                         }
                         else if(state == AntState.DEBUG)
                         {
-                            pherDir.Normalize();
-                            pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration;
-                            smellDirection += pherDir;
+
                         }
 
                         smellDirection += negDir;
@@ -315,6 +326,40 @@ public class AntClass : MonoBehaviour
 
         return smellStrength * smellDirection;
     }
+
+    //if food within search radius a vector to the food is returned
+    //else, the vector equals zero
+    public void SmellForFood(int x, int y)
+    {
+        if (state == AntState.SCOUTING)
+        {
+            if (pGrid.grid[x, y].GetComponent<Food>() != null)
+            {
+                smellDirection = pherDir;
+                //smellDirection.Normalize();
+
+                foodItem = pGrid.grid[x, y].GetComponent<Food>();
+                foodPosition = foodItem.worldFoodPosition;
+                smellingFood = true;
+            }
+            else
+            {
+                //smellDirection = Vector3.zero;                
+            }
+        }
+        else if (state == AntState.GATHERING)
+        {
+            if (pGrid.grid[x, y].GetComponent<Food>() != null)
+            {
+                smellDirection = pherDir;
+                //smellDirection.Normalize();
+                foodItem = pGrid.grid[x, y].GetComponent<Food>();
+                foodPosition = foodItem.worldFoodPosition;
+                smellingFood = true;
+            }           
+        }
+    }
+    
 
     public void CollectingFood()
     {
@@ -453,40 +498,6 @@ public class AntClass : MonoBehaviour
             }
         }        
 	}
-
-    //if food within search radius a vector to the food is returned
-    //else, the vector equals zero
-    public void SmellForFood(int x, int y)
-    {
-        if (state == AntState.SCOUTING)
-        {
-            if (pGrid.grid[x, y].GetComponent<Food>() != null)
-            {
-                smellDirection = pherDir;
-                smellDirection.Normalize();
-
-                foodItem = pGrid.grid[x, y].GetComponent<Food>();
-                foodPosition = foodItem.worldFoodPosition;
-                smellingFood = true;
-            }
-            else
-            {
-                smellDirection = Vector3.zero;                
-            }
-        }
-        else if (state == AntState.GATHERING)
-        {
-            if (pGrid.grid[x, y].GetComponent<Food>() != null)
-            {
-                smellDirection = pherDir;
-                smellDirection.Normalize();
-                foodItem = pGrid.grid[x, y].GetComponent<Food>();
-                foodPosition = foodItem.worldFoodPosition;
-                smellingFood = true;
-            }           
-        }
-    }
-    
     protected bool CheckTarget ()
 	{
 
@@ -505,6 +516,7 @@ public class AntClass : MonoBehaviour
     //if an unwalkable surface has been reached, turn the ant untill they can move
     protected void FixTarget ()
 	{
+        
 		if (!CheckTarget ())
         {
 			//generate new vector for ant as theyve found an unwalkable surface
@@ -518,6 +530,9 @@ public class AntClass : MonoBehaviour
 			}
             else
 				turnsTried = rightTurnsTried;
+
+            if(turnsTried > 1000)
+                Debug.Log(turnsTried);
 
             //float angle = turningAngle * Mathf.Pow (angleMultiplier, turnsTried - 1);
             float angle = turningAngle * turnsTried;
@@ -617,6 +632,11 @@ public class AntClass : MonoBehaviour
         {
             if (m_SpriteRenderer.color != Color.grey)
                 m_SpriteRenderer.color = Color.grey;
+        }
+        else if (state == AntState.DEBUG)
+        {
+            if (m_SpriteRenderer.color != Color.black)
+                m_SpriteRenderer.color = Color.black;
         }
     }
 

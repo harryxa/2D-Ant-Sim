@@ -69,7 +69,7 @@ public class PheromoneGrid : MonoBehaviour
                 //this may brake when world and grid made properly
                 if (World.instance.GetTileAt(x, y).type != Tile.Type.Grass)
                 {
-                    BoostConcentration(PheromoneType.NEGATIVE, x, y, 100f);
+                    BoostConcentration(PheromoneType.NEGATIVE, x, y, 0.01f);
                 }
                 //Debug.Log(World.instance.GetTileAt(x, y).type);
             }
