@@ -16,12 +16,12 @@ public class World : MonoBehaviour
 	public bool randomSeed;
 
 	//determines size of mesh
-	public int width;
-	public int height;
+	public int tileGridWidth = 100;
+	public int tileGridHeight = 100;
 	public int chunkSize = 50;
 
-	public int halfWidth;
-	public int halfHeight;
+	//public int halfWidth;
+	//public int halfHeight;
 
 	//Mesh variables
 	MeshData data;
@@ -73,8 +73,8 @@ public class World : MonoBehaviour
 		grassStartHeight = dirtEndHeight;
 		cobbleStartHeight = grassEndHeight;
 
-		halfWidth = width / 2;
-		halfHeight = height / 2;
+		//halfWidth = tileGridWidth / 2;
+		//halfHeight = tileGridHeight / 2;
 
 	}
 
@@ -107,22 +107,26 @@ public class World : MonoBehaviour
 		
 	}
 
-
+    public Vector3 worldToTileGrid(Vector3 worldPos)
+    {
+        return new Vector3(Mathf.FloorToInt((worldPos.x + WorldManager.worldWidth / 2f) / (WorldManager.worldWidth / (float)tileGridWidth)),
+            Mathf.FloorToInt((worldPos.y + WorldManager.worldHeight / 2f) / (WorldManager.worldHeight / (float)tileGridHeight)), 0f);
+    }
 
     //Create an array of tiles with a type
     void CreateTile ()
 	{
-		tiles = new Tile[width, height];
+		tiles = new Tile[tileGridWidth, tileGridHeight];
 
 		//returns a perlin noise value
-		float[,] noiseValues = noise.GetNoiseValues (width, height);
+		float[,] noiseValues = noise.GetNoiseValues (tileGridWidth, tileGridHeight);
 
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {				
+		for (int i = 0; i < tileGridWidth; i++) {
+			for (int j = 0; j < tileGridHeight; j++) {				
 				//initalise each tile in tiles array
 				tiles [i, j] = SetTileAtHeight (noiseValues [i, j]);
-				tiles [i, j].X = i - halfWidth;
-				tiles [i, j].Y = j - halfHeight;
+				tiles [i, j].X = i - tileGridWidth/2;
+				tiles [i, j].Y = j - tileGridHeight/2;
 			}
 		}
 	}
@@ -257,7 +261,7 @@ public class World : MonoBehaviour
 		}
 		meshGOvalue++;
 
-		meshGO.transform.position = new Vector3 (-halfWidth, -halfHeight, 0);
+		meshGO.transform.position = new Vector3 (-tileGridWidth/2, -tileGridHeight/2, 0);
 	}
 
 	//MOUNTAIN TILES
@@ -338,7 +342,7 @@ public class World : MonoBehaviour
 
 		meshGOMountainvalue++;
 
-		meshGO.transform.position = new Vector3 (-halfWidth, -halfHeight, 0);
+		meshGO.transform.position = new Vector3 (-tileGridWidth/2, -tileGridHeight/2, 0);
 
 	}
 
@@ -384,10 +388,10 @@ public class World : MonoBehaviour
 		noise.Persistance = persistance;
 		noise.Octaves = octaves;
 
-		float[,] noiseValues = noise.GetNoiseValues (width, height);
+		float[,] noiseValues = noise.GetNoiseValues (tileGridWidth, tileGridHeight);
 
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
+		for (int i = 0; i < tileGridWidth; i++) {
+			for (int j = 0; j < tileGridHeight; j++) {
 				//cleares mountains before resetting them
 				tiles [i, j].wall = Tile.Wall.Empty;
 				//initalise each tile in tiles array
@@ -412,10 +416,9 @@ public class World : MonoBehaviour
 		noise.Persistance = persistance;
 		noise.Octaves = octaves;
 
-		float[,] noiseValues = noise.GetNoiseValues (width, height);
 
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) 
+		for (int i = 0; i < tileGridWidth; i++) {
+			for (int j = 0; j < tileGridHeight; j++) 
 			{
 				//cleares mountains before resetting them
 				tiles [i, j].wall = Tile.Wall.Empty;
@@ -423,9 +426,9 @@ public class World : MonoBehaviour
 				tiles [i, j] = SetTileAtHeight (grassEndHeight, tiles [i, j]);
 
 				tiles [i, 0] = SetTileAtHeight (grassStartHeight, tiles [i, 0]);  
-				tiles [i, height-1] = SetTileAtHeight (grassStartHeight, tiles [i, height-1]); 
+				tiles [i, tileGridHeight-1] = SetTileAtHeight (grassStartHeight, tiles [i, tileGridHeight-1]); 
 				tiles [0, j] = SetTileAtHeight (grassStartHeight, tiles [0, j]); 
-				tiles [width -1, j] = SetTileAtHeight (grassStartHeight, tiles [width -1, j]);  
+				tiles [tileGridWidth -1, j] = SetTileAtHeight (grassStartHeight, tiles [tileGridWidth -1, j]);  
 			}
 		}	
 		for (int i = 0; i < meshGOvalue; i++) { 
@@ -437,7 +440,7 @@ public class World : MonoBehaviour
 		
 	public Tile GetTileAt (int x, int y)
 	{
-		if (x < 0 || x >= width || y < 0 || y >= height) {
+		if (x < 0 || x >= tileGridWidth || y < 0 || y >= tileGridHeight) {
 			//Debug.Log ("Tile (" + x + ", " + y + ") is out of range");
 			return null;
 		}

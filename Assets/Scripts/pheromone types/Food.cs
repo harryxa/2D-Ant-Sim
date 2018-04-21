@@ -28,17 +28,13 @@ public class Food : PheromoneNode
         }
     }
 
-    public void ReduceFoodAmount()
+    public void ReduceFood(float amount)
     {
         //STANDARD PHEROMONE
-        if (pheromoneConcentration > 0f)
+        if (pheromoneConcentration > 0)
         {
-            quantity -= 1;           
+            quantity -= amount;           
         }
 
-        else
-        {
-            Destroy(gameObject);
-        }
     }
 }

@@ -9,8 +9,11 @@ public class PheromoneNode : MonoBehaviour
 	private float defaultConc = 5f;
 	private float maxConc = 100f;
 
-	protected float evaporationRate = 0.2f;
-	protected float defaultScale = 0.1f;
+	//protected float evaporationRate = 0.2f;
+    protected float evaporationRate = 0.25f;
+    protected float carryEvaporationRate = 0.5f;
+
+    protected float defaultScale = 0.1f;
 
 	//public bool exists = true;
 	public int gridX;
@@ -79,22 +82,27 @@ public class PheromoneNode : MonoBehaviour
                 float scale = (pheromoneConcentration / defaultConc) * defaultScale;
                 transform.localScale = new Vector3(scale, scale, scale);
             }
+            if (pheromoneConcentration < 0)
+                pheromoneConcentration = 0f;
 		}
         //CARRY PHEROMONE
-		else if (carryConcentration > 0f) 
+		if (carryConcentration > 0f) 
 		{
 			if (carryConcentration > maxConc)
 				carryConcentration = maxConc;
 
-			carryConcentration -= evaporationRate * Time.deltaTime;
+			carryConcentration -= carryEvaporationRate * Time.deltaTime;
 
             if (pheromoneConcentration < carryConcentration)
             {
                 float scale = (carryConcentration / defaultConc) * defaultScale;
                 transform.localScale = new Vector3(scale, scale, scale);
             }
-		}
-		else if (negativeConcentration > 0)
+            if (carryConcentration < 0)
+                carryConcentration = 0f;
+
+        }
+		if (negativeConcentration > 0)
 		{
             transform.localScale = new Vector3(1f, 1f, 1f);
 		}
@@ -102,17 +110,18 @@ public class PheromoneNode : MonoBehaviour
 
     public void ChangePheromoneColour()
     {
-        if(pheromoneConcentration > carryConcentration)
-        {
-            if (m_spriteRenderer.color != Color.white)
-                m_spriteRenderer.color = Color.white;
-        }
-        else if (carryConcentration > pheromoneConcentration)
+        if (carryConcentration > 0)
         {
             if (m_spriteRenderer.color != Color.blue)
                 m_spriteRenderer.color = Color.blue;
         }
-        else if (negativeConcentration > 1)
+        else if (pheromoneConcentration > 0)
+        {
+            if (m_spriteRenderer.color != Color.white)
+                m_spriteRenderer.color = Color.white;
+        }
+        
+        else if (negativeConcentration > 0)
         {
             if (m_spriteRenderer.color != Color.black)
                 m_spriteRenderer.color = Color.black;

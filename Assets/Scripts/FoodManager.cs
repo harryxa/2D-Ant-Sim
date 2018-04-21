@@ -15,11 +15,11 @@ public class FoodManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
 	{
-		if (i == 0) {
-			//pGrid.addFood (new Vector3 (-20, -20, 0));
-            pGrid.addFood(new Vector3(20, 20, 0));
+		//if (i == 0) {
+		//	//pGrid.addFood (new Vector3 (-20, -20, 0));
+  //          pGrid.addFood(new Vector3(20, 20, 0));
 
-            i++;
-		}
+  //          i++;
+		//}
 	}
 }

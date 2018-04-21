@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class NestManager : MonoBehaviour
 {
-    public int foodStored = 0;
+    public float foodStored = 0;
 
 	// Use this for initialization
 	void Start ()
@@ -18,9 +18,9 @@ public class NestManager : MonoBehaviour
 		
 	}
 
-    public void StoreFood()
+    public void StoreFood(float amount)
     {
-        foodStored++;
+        foodStored += amount;
     }
 
 

@@ -16,7 +16,7 @@ public class AntEditor : MonoBehaviour
         
 
 
-        for (int i = 0; i <= queenAnt.antCount; i++)
+        for (int i = 0; i <= queenAnt.pooledAntCount; i++)
         {
             ants.Add(queenAnt.ants[i]);
         }

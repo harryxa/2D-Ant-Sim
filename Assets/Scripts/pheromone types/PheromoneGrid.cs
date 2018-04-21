@@ -6,21 +6,20 @@ public class PheromoneGrid : MonoBehaviour
 {
     
 
+	private int pherGridHeight = 100;
+	private int pherGridWidth = 100;
 
-	private float worldWidth = 100;
-	private float worldHeight = 100;
-	private int gridHeight = 100;
-	private int gridWidth = 100;
-
-
-	public Transform[,] grid;
+    public Transform[,] grid;
 	public Transform pheromone;
 	public Transform genericFood;
 	public Transform nest;
 
     public Vector3 worldNestPosition;
 
-    
+    GameObject ParentPheromoneGameObject;
+
+
+
 
     public enum PheromoneType
     {
@@ -36,9 +35,9 @@ public class PheromoneGrid : MonoBehaviour
 	{
 
         //grid can range from 0 to 10, so + 1
-        grid = new Transform[gridWidth + 1, gridHeight + 1];
+        grid = new Transform[pherGridWidth , pherGridHeight];
 
-        Debug.Log(World.instance.GetTileAt(0, 0).type);
+        //Debug.Log(World.instance.GetTileAt(0, 0).type);
 
         InitialisePheromones();
 
@@ -57,55 +56,82 @@ public class PheromoneGrid : MonoBehaviour
 
     private void InitialisePheromones()
     {
-        for (int x = 0; x < gridWidth + 1; x++)
-        {
-            for (int y = 0; y < gridHeight + 1; y++)
-            {
-                //TODO hacky grid displacement
-                //grid[x, y] = Instantiate(pheromone, gridToWorld(new Vector3(x + 0.5f, y + 0.5f,0)), Quaternion.identity);
+        ParentPheromoneGameObject = new GameObject("Pheromones");
 
-                AddPheromone(gridToWorld(new Vector3(x, y, 0)), PheromoneType.STANDARD, 0f);
+
+        for (int x = 0; x < pherGridWidth; x++)
+        {
+            for (int y = 0; y < pherGridHeight; y++)
+            {
+                //Debug.Log(x + ", " + y);
+         
+                AddPheromoneNodes(gridToWorld(new Vector3(x, y, 0)), PheromoneType.STANDARD, 0f);
 
                 //this may brake when world and grid made properly
                 if (World.instance.GetTileAt(x, y).type != Tile.Type.Grass)
                 {
-                    BoostConcentration(PheromoneType.NEGATIVE, x, y, 0.01f);
+                    BoostConcentration(PheromoneType.NEGATIVE, x, y, 100f);
                 }
-                //Debug.Log(World.instance.GetTileAt(x, y).type);
             }
         }
     }
 
-    public void AddPheromone(Vector3 worldPos, PheromoneType _pType, float concentrationMultiplier)
+    public void AddPheromoneNodes(Vector3 worldPos, PheromoneType _pType, float concentrationMultiplier)
 	{
 		Vector3 gridPos = worldToGrid (worldPos);
-		gridPos.x = Mathf.RoundToInt(gridPos.x);
-		gridPos.y = Mathf.RoundToInt(gridPos.y);
+		//gridPos.x = Mathf.RoundToInt(gridPos.x);
+		//gridPos.y = Mathf.RoundToInt(gridPos.y);
 
         
 
         int x = (int)gridPos.x;
 		int y = (int)gridPos.y;
 
-        gridPos.x += 0.5f;
-        gridPos.y += 0.5f;
+        //gridPos.x += 0.5f;
+        //gridPos.y += 0.5f;
 
         if (grid[x, y] == null)
         {
-            if (true || World.instance.GetTileAt(x, y).type == Tile.Type.Grass || World.instance.GetTileAt(x, y) == null)
-            {
-                //instantiate pheromone
-                grid[x, y] = Instantiate(pheromone, gridToWorld(gridPos), Quaternion.identity);
+            //instantiate pheromone
+            grid[x, y] = Instantiate(pheromone, gridToWorld(gridPos), Quaternion.identity);
 
-                PheromoneNode node = grid[x, y].GetComponent<PheromoneNode>();
-                node.SetXY(x, y);
-                BoostConcentration(_pType, x, y, concentrationMultiplier); 
-            }                       
+            PheromoneNode node = grid[x, y].GetComponent<PheromoneNode>();
+            node.SetXY(x, y);
+
+            node.transform.SetParent(ParentPheromoneGameObject.transform);
+
+            BoostConcentration(_pType, x, y, concentrationMultiplier); 
+                                  
         }
 
         //boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
 		else
 		{
+            //BoostConcentration(_pType, x, y, concentrationMultiplier);
+            Debug.Log("Shouldn't be here.");
+        }
+    }
+
+    public void AddPheromone(Vector3 worldPos, PheromoneType _pType, float concentrationMultiplier)
+    {
+        Vector3 gridPos = worldToGrid(worldPos);
+        //gridPos.x = Mathf.FloorToInt(gridPos.x);
+        //gridPos.y = Mathf.FloorToInt(gridPos.y);
+
+
+
+        int x = (int)gridPos.x;
+        int y = (int)gridPos.y;
+
+        //gridPos.x += 0.5f;
+        //gridPos.y += 0.5f;
+
+        if (grid[x, y] == null)
+            return;
+
+        //boost concentration of existing pheromone // ### Is instantiating an object too slow? ###
+        else
+        {
             BoostConcentration(_pType, x, y, concentrationMultiplier);
         }
     }
@@ -128,8 +154,8 @@ public class PheromoneGrid : MonoBehaviour
     public void addFood(Vector3 worldPos)
 	{		
 		Vector3 gridPos = worldToGrid (worldPos);
-		gridPos.x = Mathf.RoundToInt(gridPos.x);
-		gridPos.y = Mathf.RoundToInt(gridPos.y);
+		//gridPos.x = Mathf.RoundToInt(gridPos.x);
+		//gridPos.y = Mathf.RoundToInt(gridPos.y);
 		int x = (int)gridPos.x;
 		int y = (int)gridPos.y;
 
@@ -143,8 +169,8 @@ public class PheromoneGrid : MonoBehaviour
 	public void addNest(Vector3 worldPos)
 	{
 		Vector3 gridPos = worldToGrid (worldPos);
-		gridPos.x = Mathf.RoundToInt(gridPos.x);
-		gridPos.y = Mathf.RoundToInt(gridPos.y);
+		//gridPos.x = Mathf.RoundToInt(gridPos.x);
+		//gridPos.y = Mathf.RoundToInt(gridPos.y);
 		int x = (int)gridPos.x;
 		int y = (int)gridPos.y;
 
@@ -160,43 +186,15 @@ public class PheromoneGrid : MonoBehaviour
 
 	public Vector3 gridToWorld(Vector3 gridPos) 
 	{
-		return new Vector3 (gridPos.x * (worldWidth / (float)gridWidth) - worldWidth/2f, 
-			gridPos.y * (worldHeight / (float)gridHeight) - worldHeight/2f, 0f);
+		return new Vector3 ((gridPos.x+0.5f) * (WorldManager.worldWidth / (float)pherGridWidth) - WorldManager.worldWidth/2f, 
+			(gridPos.y+0.5f) * (WorldManager.worldHeight / (float)pherGridHeight) - WorldManager.worldHeight/2f, 0f);
 	}
 
 	public  Vector3 worldToGrid(Vector3 worldPos)
 	{
-		return new Vector3 ((worldPos.x + worldWidth/2)   /   (worldWidth / (float)gridWidth),
-			(worldPos.y + worldHeight/2)  /   (worldHeight / (float)gridHeight), 0f);
-	}
-
-	public Vector3 wrapGridCoord(Vector3 gridPos)
-	{
-		while (gridPos.x < 0)
-			gridPos.x += gridWidth;
-		while (gridPos.y < 0)
-			gridPos.y += gridHeight;
-		while (gridPos.x > gridWidth)
-			gridPos.x -= gridWidth;
-		while (gridPos.y > gridHeight)
-			gridPos.y -= gridHeight;
-
-		return gridPos;
+		return new Vector3 (Mathf.FloorToInt((worldPos.x + WorldManager.worldWidth/2f)   /   (WorldManager.worldWidth / (float)pherGridWidth)),
+            Mathf.FloorToInt((worldPos.y + WorldManager.worldHeight/2f)  /   (WorldManager.worldHeight / (float)pherGridHeight)), 0f);
 	}
 
 
-	public float getWorldWidth()
-	{		
-		return worldWidth;
-	}
-
-	public float getWorldHeight()
-	{
-		return worldHeight;
-	}
-
-
-
-
-    
 }

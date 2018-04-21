@@ -7,13 +7,16 @@ public class QueenAnt : AntClass
 
     public List<GameObject> ants;
 	public GameObject workerAnt;
-	public int antCount;
+    // was private
+	public int pooledAntCount = 2000;
 
     private int activeAnts = 0;
     public int numberOfScouts;
+    public int colonySize;
 
     public float workerAntSpeed;
-    
+    public float timeSinceAntReleased = 0f;
+    public float antReleaseRate;
 
     // Use this for initialization
     void Start ()
@@ -21,21 +24,19 @@ public class QueenAnt : AntClass
 
 		this.pGrid = GameObject.FindWithTag("PGrid").GetComponent<PheromoneGrid>();
 
-        halfWorldHeight = pGrid.getWorldHeight() / 2;
-        halfWorldWidth = pGrid.getWorldWidth() / 2;
 
-        worldHeight = pGrid.getWorldHeight();
-        worldWidth = pGrid.getWorldWidth();
 
         PlaceQueen();
+
         this.pGrid.addNest(transform.position);
         antSpeed = 0;
         ants = new List<GameObject>();
+
 		SpawnAnts();
+
         workerAntSpeed = 2f;
         state = AntState.GATHERING;
-        worldHeight = pGrid.getWorldHeight();
-        worldWidth = pGrid.getWorldWidth();
+
 
     }
 	
@@ -44,6 +45,7 @@ public class QueenAnt : AntClass
 	{
         SmellPheromone();
 
+        // TODO: Sort out this mess!
         for (int i = 0; i <= ants.Count - 1; i++)
         {
             if (activeAnts < numberOfScouts)
@@ -70,22 +72,28 @@ public class QueenAnt : AntClass
             ants[i].GetComponent<AntClass>().SetAntSpeed(workerAntSpeed);
            // ants[i].GetComponent<AntClass>().setSecrete();
         }
+
+        timeSinceAntReleased += Time.deltaTime;
+        ReleaseGatherers();
     }
 
     private void PlaceQueen()
     {
-        
+        transform.position = new Vector3(Random.Range(-WorldManager.worldWidth/2f, WorldManager.worldWidth/2f),
+                                             Random.Range(-WorldManager.worldHeight/2f, WorldManager.worldHeight/2f),
+                                             0f);
+
         while (!PositionSafe(transform.position))
-            transform.position = new Vector3(Random.Range(-halfWorldWidth, halfWorldWidth),
-                                             Random.Range(-halfWorldHeight, halfWorldHeight),
+            transform.position = new Vector3(Random.Range(-WorldManager.worldWidth/2f, WorldManager.worldWidth/2f),
+                                             Random.Range(-WorldManager.worldHeight/2f, WorldManager.worldHeight/2f),
                                              0f);
     }
 
     private bool PositionSafe(Vector3 worldPosition)
     {
-        Vector3 gridPosition = pGrid.worldToGrid(worldPosition);
-        int x = Mathf.FloorToInt(gridPosition.x);
-        int y = Mathf.FloorToInt(gridPosition.y);
+        Vector3 gridPosition = World.instance.worldToTileGrid(worldPosition); //******
+        int x = (int)gridPosition.x;
+        int y = (int)gridPosition.y;
 
         return (World.instance.GetTileAt(x, y).type == Tile.Type.Grass);
     }
@@ -95,8 +103,8 @@ public class QueenAnt : AntClass
     {
         //gets the ants location on the grid
         Vector3 antGridPos = pGrid.worldToGrid(transform.position);
-        int gridX = Mathf.RoundToInt(antGridPos.x);
-        int gridY = Mathf.RoundToInt(antGridPos.y);
+        int gridX = (int)antGridPos.x;
+        int gridY = (int)antGridPos.y;
 
         int smellRadius = 7;
         carryPheromoneCount = 0f;
@@ -106,7 +114,7 @@ public class QueenAnt : AntClass
         {
             for (int y = gridY - smellRadius; y <= gridY + smellRadius; y++)
             {
-                if (x >= 0 && x < worldWidth && y >= 0 && y < worldHeight)
+                if (x >= 0 && x < WorldManager.worldWidth && y >= 0 && y < WorldManager.worldHeight)
                 {
                     if (pGrid.grid[x, y] != null)
                     {
@@ -122,18 +130,40 @@ public class QueenAnt : AntClass
 
     public void ReleaseGatherers()
     {
-        //the stronger the pheromone count the more ants get released
+        antReleaseRate = 100f / carryPheromoneCount;
+
+        //TODO: add colony size ie. if (numscouts < colsize) then allowed to release more
+
+        //only release at all if can smell at least e.g. 10 pheromones
+        if(antReleaseRate > 1f) {
+            if(timeSinceAntReleased >= antReleaseRate)
+            {
+                // Release an ant
+                if (activeAnts < pooledAntCount)
+                    //??
+                    
+
+                // Reset time conter
+                timeSinceAntReleased = 0f;
+            }
+        }
+            
     }
 
     
 
 	void SpawnAnts ()
 	{
-		for(int i = 0; i < antCount; i++)
+
+        GameObject parentAntGameObject = new GameObject("Ants");
+
+
+		for(int i = 0; i < pooledAntCount; i++)
         {
             GameObject ant = Instantiate(workerAnt, transform.position, Quaternion.Euler(0, 0, Random.value * 360));
             ants.Add(ant);
-            ants[i].SetActive(false);            
+            ants[i].SetActive(false);
+            ants[i].transform.SetParent(parentAntGameObject.transform);
         }
     }
 }

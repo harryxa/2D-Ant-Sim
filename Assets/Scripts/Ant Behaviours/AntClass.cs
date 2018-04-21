@@ -36,17 +36,11 @@ public class AntClass : MonoBehaviour
 	protected bool stepped;
 
 	//wander variables for random target
-	protected float jitterScale = 0.5f;
+	protected float randomWanderMagnitude = 0.5f;
 	protected float wanderDistance = 1f;
 	protected Vector3 targetPosition;
 	protected float distanceRadius = 0.1f;
 	protected float rotateSpeed = 20f;
-
-	//bounding box floats
-	protected float worldHeight;
-    protected float worldWidth;
-    protected float halfWorldHeight;
-    protected float halfWorldWidth;
 
 	//Vector3 nextPosition;
 	public float antSpeed = 20f;
@@ -70,6 +64,7 @@ public class AntClass : MonoBehaviour
     private Vector3 foodPosition;
     public bool smellingFood = false;
     public bool carryingFood;
+    private float carryAmount = 2.0f;
 
     //SMELLING
     protected PheromoneGrid pGrid;
@@ -81,6 +76,8 @@ public class AntClass : MonoBehaviour
 
     public float hunger;
     public bool nesting;
+
+    private float nestPullStrength = 0.8f;
 
 
     public float CarryCount = 0f;
@@ -96,12 +93,6 @@ public class AntClass : MonoBehaviour
 
 		//find the pheromone grid, where pheromone data is stored.
 		pGrid = GameObject.FindWithTag ("PGrid").GetComponent<PheromoneGrid> ();
-
-		halfWorldHeight = pGrid.getWorldHeight () / 2;
-		halfWorldWidth = pGrid.getWorldWidth () / 2;
-
-		worldHeight = pGrid.getWorldHeight ();
-		worldWidth = pGrid.getWorldWidth ();
 
 		//set ants initial target vector to its own position, rather than 0,0,0
 		targetPosition = new Vector3 (transform.position.x, transform.position.y, 0f);
@@ -125,6 +116,7 @@ public class AntClass : MonoBehaviour
 
 	void Update ()
 	{
+
         //secrete pheromone when target destination is reached
         if (canSecrete == true)
         {
@@ -145,6 +137,9 @@ public class AntClass : MonoBehaviour
         hunger -= 0.5f * Time.deltaTime;
         Hunger();
         //Debug.DrawLine(transform.position, transform.position + SmellDirection());
+        //Debug.Log(pGrid.worldToGrid(transform.position) + " || " );
+        //Debug.Log(transform.position);
+
     }
 
     //Sets the target for the ant then moves the ant to said target
@@ -170,7 +165,8 @@ public class AntClass : MonoBehaviour
                     break;
 
                 case AntState.CARRYING:
-                    target = SmellDirection() + RandomTarget() + (NestDirection() );
+                                                                                  // bit dodgy doing it here
+                    target = SmellDirection() + RandomTarget() + (NestDirection() * nestPullStrength);
 
                     //target = SmellDirection() + NestDirection();
                     target.Normalize();
@@ -179,7 +175,7 @@ public class AntClass : MonoBehaviour
                     break;
 
                 case AntState.GATHERING:
-                    target = SmellDirection() * 1f - NestDirection() * 0.9f + RandomTarget();
+                    target = SmellDirection() * 1f - NestDirection() * nestPullStrength + RandomTarget();
                     target.Normalize();
                     SetTarget(target);
                     //Debug.DrawLine(transform.position, transform.position - SmellDirection());
@@ -211,8 +207,8 @@ public class AntClass : MonoBehaviour
     {
         //gets the ants location on the grid
         Vector3 antGridPos = pGrid.worldToGrid(transform.position);
-        int gridX = Mathf.RoundToInt(antGridPos.x);
-        int gridY = Mathf.RoundToInt(antGridPos.y);
+        int gridX = (int)antGridPos.x;
+        int gridY = (int)antGridPos.y;
 
         //smellDirection = ants position
 
@@ -235,7 +231,7 @@ public class AntClass : MonoBehaviour
             {                
                 pherDir = new Vector3(x - gridX, y - gridY, 0);
                 
-                if (x >= 0 && x < worldWidth && y >= 0 && y < worldHeight && pherDir.magnitude <= smellRadius)
+                if (x >= 0 && x < WorldManager.worldWidth && y >= 0 && y < WorldManager.worldHeight && pherDir.magnitude <= smellRadius)
                 {                    
                     if (pGrid.grid[x, y] != null)
                     {
@@ -254,10 +250,10 @@ public class AntClass : MonoBehaviour
 
                         //if WANDERING smell for food and randomly wander around the map
                         //set state to carry if food found                        
-                        if (state == AntState.SCOUTING)
+                        if (state == AntState.SCOUTING && !smellingFood)
                         {
                             //if carryPheromones are smelt change to gathering
-                            if (pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration > 10)
+                            if (pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration > 40)
                             {
                                 state = AntState.GATHERING;
                             }
@@ -289,7 +285,7 @@ public class AntClass : MonoBehaviour
                             }
                         }
                         //if GATHERING smell pheromones, collect food etc
-                        else if (state == AntState.GATHERING)
+                        else if (state == AntState.GATHERING && !smellingFood)
                         {       
                             if (pGrid.grid[x,y].GetComponent<PheromoneNode>().carryConcentration >= 1)
                             {
@@ -366,7 +362,7 @@ public class AntClass : MonoBehaviour
         if(state == AntState.COLLECTINGFOOD)
         {
             carryingFood = true;
-            foodItem.ReduceFoodAmount();
+            foodItem.ReduceFood(carryAmount);
             state = AntState.CARRYING;
             hunger = 100;          
         }
@@ -407,7 +403,7 @@ public class AntClass : MonoBehaviour
                 if (TargetReached(targetdest, 2f))
                 {
                     state = AntState.GATHERING;
-                    nest.StoreFood();
+                    nest.StoreFood(carryAmount);
                     carryingFood = false;
                 }
 
@@ -469,10 +465,11 @@ public class AntClass : MonoBehaviour
     //secretes a pheremone where the ant is currently standing
     private void Secrete ()
     {
-        Vector3 antPosition = new Vector3(transform.position.x - 0.5f, transform.position.y - 0.5f, 0);
-
-        if (World.instance.GetTileAt(Mathf.FloorToInt(targetPosition.x + halfWorldWidth), 
-            Mathf.FloorToInt(targetPosition.y + halfWorldHeight)).type != Tile.Type.Grass)
+        // previous +0.5s mean this is now the same as transform.position
+        // SCHEDULED FOR REMOVAL
+        Vector3 antPosition = new Vector3(transform.position.x, transform.position.y, 0);
+        Vector3 tileGridPos = World.instance.worldToTileGrid(antPosition);
+        if (World.instance.GetTileAt((int)tileGridPos.x, (int)tileGridPos.y).type != Tile.Type.Grass)
         {
             return;
         }
@@ -488,29 +485,38 @@ public class AntClass : MonoBehaviour
                 float nestDista = Vector3.Distance(transform.position, pGrid.worldNestPosition);
                 if (nestDista > 5f)
                 {
-                    pGrid.AddPheromone(antPosition, PheromoneGrid.PheromoneType.CARRYING, 2.0f);
+                    pGrid.AddPheromone(antPosition, PheromoneGrid.PheromoneType.CARRYING, 1.0f);
                 }
                 //else add more if close to nest, want to draw ant sou tof the nest
                 else
                 {
-                    pGrid.AddPheromone(antPosition, PheromoneGrid.PheromoneType.CARRYING, 8f);
+                    pGrid.AddPheromone(antPosition, PheromoneGrid.PheromoneType.CARRYING, 2f);
                 }
             }
         }        
 	}
+
     protected bool CheckTarget ()
 	{
+        Vector3 tgPosition = World.instance.worldToTileGrid(targetPosition);
+        
 
-		if (targetPosition.x < -halfWorldWidth || targetPosition.x >= halfWorldWidth || targetPosition.y < -halfWorldHeight || targetPosition.y >= halfWorldHeight)
+		if (targetPosition.x <= -WorldManager.worldWidth/2f || targetPosition.x >= WorldManager.worldWidth/2f || targetPosition.y <= -WorldManager.worldHeight/2f || targetPosition.y >= WorldManager.worldHeight/2f)
         {
 			return false;
 		}
-        else if (World.instance.GetTileAt (Mathf.FloorToInt (targetPosition.x + halfWorldWidth), Mathf.FloorToInt (targetPosition.y + halfWorldHeight)).type != Tile.Type.Grass)
+        else if (World.instance.GetTileAt((int)tgPosition.x, (int)tgPosition.y) == null)
+        {
+            Debug.Log(tgPosition.x + ", " + tgPosition.y);
+            return false;
+        }
+        else if (World.instance.GetTileAt((int)tgPosition.x, (int)tgPosition.y).type != Tile.Type.Grass)
         {				
 			return false;
 		}
         else
 			return true;
+        
 	}
 
     //if an unwalkable surface has been reached, turn the ant untill they can move
@@ -531,8 +537,9 @@ public class AntClass : MonoBehaviour
             else
 				turnsTried = rightTurnsTried;
 
-            if(turnsTried > 1000)
-                Debug.Log(turnsTried);
+            //COULDVE BEEN CAUSE FOR CRASHES??????
+            //if(turnsTried > 1000)
+                //Debug.Log(turnsTried);
 
             //float angle = turningAngle * Mathf.Pow (angleMultiplier, turnsTried - 1);
             float angle = turningAngle * turnsTried;
@@ -577,7 +584,7 @@ public class AntClass : MonoBehaviour
 
 		//make the Target fit on circle again
 		target.Normalize ();
-		target *= jitterScale;
+		target *= randomWanderMagnitude;
 
 		return target;
 	}
@@ -645,5 +652,8 @@ public class AntClass : MonoBehaviour
         antSpeed = _antSpeed;
     }
 
-
+    //public float getCarryAmount()
+    //{
+    //    return carryAmount;
+    //}
 }

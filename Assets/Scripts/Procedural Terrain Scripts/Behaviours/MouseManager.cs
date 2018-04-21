@@ -43,7 +43,7 @@ public class MouseManager : MonoBehaviour
 	{
         Vector3 currMousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
         Vector3 currMousePosAnts = currMousePos;
-        currMousePos = new Vector3 (currMousePos.x + World.instance.halfWidth, currMousePos.y + World.instance.halfHeight, currMousePos.z);
+        currMousePos = new Vector3 (currMousePos.x + World.instance.tileGridWidth/2f, currMousePos.y + World.instance.tileGridHeight/2f, currMousePos.z);
         
 		//update cursor position
 		Tile tileUnderMouse = GetTileAtWorldCoord (currMousePos);
@@ -166,7 +166,7 @@ public class MouseManager : MonoBehaviour
 		Camera.main.orthographicSize = fov;
 
 		lastMousePosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-		lastMousePosition = new Vector3 (lastMousePosition.x + World.instance.halfWidth, lastMousePosition.y + World.instance.halfHeight, lastMousePosition.z);
+		lastMousePosition = new Vector3 (lastMousePosition.x + World.instance.tileGridWidth/2f, lastMousePosition.y + World.instance.tileGridHeight/2f, lastMousePosition.z);
 
 	}
 
