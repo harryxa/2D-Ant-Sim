@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class NestManager : MonoBehaviour
 {
-    public float foodStored = 0;
+    public float foodStored;
 
 	// Use this for initialization
 	void Start ()
     {
-		
+        foodStored = 50f;
 	}
 	
 	// Update is called once per frame
@@ -17,6 +17,11 @@ public class NestManager : MonoBehaviour
     {
 		
 	}
+
+    public void TakeFood(float amount)
+    {
+        foodStored -= amount;
+    }
 
     public void StoreFood(float amount)
     {

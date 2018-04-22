@@ -7,6 +7,7 @@ public class WorldManager : MonoBehaviour
 
     public static float worldWidth = 100f;
     public static float worldHeight = 100f;
+    public float timeRate = 1f;
 	// Use this for initialization
 	void Start () {
 		
@@ -16,4 +17,6 @@ public class WorldManager : MonoBehaviour
 	void Update () {
 		
 	}
+
+
 }

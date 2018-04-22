@@ -5,12 +5,13 @@ using UnityEngine;
 public class PheromoneNode : MonoBehaviour 
 {
     protected SpriteRenderer m_spriteRenderer;
+    private WorldManager worldManager;
 
 	private float defaultConc = 5f;
-	private float maxConc = 100f;
+	private float maxConc = 50;
 
 	//protected float evaporationRate = 0.2f;
-    protected float evaporationRate = 0.25f;
+    protected float evaporationRate = 0.5f;
     protected float carryEvaporationRate = 0.5f;
 
     protected float defaultScale = 0.1f;
@@ -35,8 +36,7 @@ public class PheromoneNode : MonoBehaviour
 
     void Start () 
 	{
-
-
+        worldManager = GameObject.FindWithTag("WorldManager").GetComponent<WorldManager>();
     }
 
     void Update () 
@@ -75,7 +75,7 @@ public class PheromoneNode : MonoBehaviour
 			if (pheromoneConcentration > maxConc)
 				pheromoneConcentration = maxConc;
 
-			pheromoneConcentration -= evaporationRate * Time.deltaTime;
+			pheromoneConcentration -= evaporationRate * Time.deltaTime * worldManager.timeRate;
 
             if (pheromoneConcentration > carryConcentration)
             {
@@ -91,7 +91,7 @@ public class PheromoneNode : MonoBehaviour
 			if (carryConcentration > maxConc)
 				carryConcentration = maxConc;
 
-			carryConcentration -= carryEvaporationRate * Time.deltaTime;
+			carryConcentration -= carryEvaporationRate * Time.deltaTime * worldManager.timeRate;
 
             if (pheromoneConcentration < carryConcentration)
             {

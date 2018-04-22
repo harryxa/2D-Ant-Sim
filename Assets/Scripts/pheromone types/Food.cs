@@ -5,15 +5,16 @@ using UnityEngine;
 public class Food : PheromoneNode
 {
 
-	public float quantity = 100f;
+	public float quantity;
     public Vector3 worldFoodPosition;
 
-	private float startingConcentration;
 
 	void Start()
 	{
+        quantity = Random.Range(10, 300);
         pheromoneConcentration = quantity;
-		defaultScale = 0.04f;
+		defaultScale = 0.02f;
+
 	}
 
 	void Update()

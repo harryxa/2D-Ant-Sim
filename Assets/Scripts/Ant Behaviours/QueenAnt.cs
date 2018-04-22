@@ -4,51 +4,106 @@ using UnityEngine;
 
 public class QueenAnt : AntClass
 {
-
+    
     public List<GameObject> ants;
 	public GameObject workerAnt;
     // was private
-	public int pooledAntCount = 2000;
-
-    private int activeAnts = 0;
-    public int numberOfScouts;
+	public int pooledAntCount;
+    public int activeAnts = 0;
+    public float antsInWorld;
     public int colonySize;
+    private float scoutRatio = 0.25f;
 
     public float workerAntSpeed;
     public float timeSinceAntReleased = 0f;
-    public float antReleaseRate;
+    public float antReleaseFrequency;
+
+    //private float previousCarryPheromoneCount = 0;
+    private float pheromonesPerAntPerSecond = 750f;
+    private float minimumPheromonesForAntRelease = 50f;
+    private NestManager nest;
+
+    private float stockpiledMealsPerAnt = 5f;
+
+    private float birthFoodCost = 0.5f;     //food required to increment colony size
+    private float timeSinceAntBorn;
+    private float antBirthFreq;
+    private float freqScale = 10f; // ant per ten seconds when we have an excess
+    private float maxBirthFreq = 2f;
+
 
     // Use this for initialization
     void Start ()
 	{
-
 		this.pGrid = GameObject.FindWithTag("PGrid").GetComponent<PheromoneGrid>();
-
-
-
         PlaceQueen();
-
         this.pGrid.addNest(transform.position);
+        nest = GameObject.FindWithTag("Nest").GetComponent<NestManager>();
+        
         antSpeed = 0;
         ants = new List<GameObject>();
 
 		SpawnAnts();
 
-        workerAntSpeed = 2f;
         state = AntState.GATHERING;
-
+        worldManager = GameObject.FindWithTag("WorldManager").GetComponent<WorldManager>();
 
     }
-	
-	// Update is called once per frame
-	void Update ()
+
+    // Update is called once per frame
+    void Update ()
 	{
         SmellPheromone();
+        ManageColonySize();
+        ActivateAnts();
+        timeSinceAntReleased += Time.deltaTime * worldManager.timeRate;
+        timeSinceAntBorn += Time.deltaTime * worldManager.timeRate;
+        ReleaseGatherers();
+    }
 
-        // TODO: Sort out this mess!
-        for (int i = 0; i <= ants.Count - 1; i++)
+
+    public void ManageColonySize()
+    {
+        float stockpileSize = nest.foodStored / (AntClass.foodTakenFromNest * stockpiledMealsPerAnt);
+
+        // If food stored is bigger than colony size incease colony size, but
+        // scale by the number of stockpiled meals wanted
+        if (stockpileSize > colonySize)
         {
-            if (activeAnts < numberOfScouts)
+
+            antBirthFreq = colonySize / stockpileSize; //partway through calculating
+            if (antBirthFreq > maxBirthFreq)
+                antBirthFreq = maxBirthFreq;
+
+            antBirthFreq *= freqScale; // actual frequency
+
+            if (timeSinceAntBorn > antBirthFreq)
+            {
+                nest.TakeFood(birthFoodCost);
+
+                timeSinceAntBorn = 0f;
+                colonySize++;
+            }
+        }
+    }
+
+    public void ActivateAnts()
+    {
+        for (int i = 0; i < ants.Count; i++)
+        {
+            AntClass antComponent = ants[i].GetComponent<AntClass>();
+            if (antComponent.state == AntState.DEAD)
+            {
+                Debug.Log("ant deyd");
+                activeAnts--;
+                colonySize--;
+                ants[i].transform.position = nest.transform.position;
+                antComponent.hunger = antComponent.maxHunger;
+                antComponent.state = AntState.SCOUTING;
+
+                ants[i].SetActive(false);
+            }
+            if (activeAnts < antsInWorld)
             {
                 if (ants[i].activeSelf == false)
                 {
@@ -56,25 +111,55 @@ public class QueenAnt : AntClass
                     activeAnts++;
                 }
             }
-            else if (activeAnts > numberOfScouts)
+            else if (activeAnts > antsInWorld)
             {
                 if (ants[i].activeSelf == true)
                 {
-                    if(ants[i].GetComponent<AntClass>().state == AntState.NESTING && ants[i].GetComponent<AntClass>().nesting == true)
+                    if (antComponent.state == AntState.NESTING
+                        && antComponent.atNest == true)
                     {
-                        ants[i].GetComponent<AntClass>().nesting = false;
+                        antComponent.atNest = false;
                         ants[i].SetActive(false);
                         activeAnts--;
-                        ants[i].GetComponent<AntClass>().hunger = 100f;
-                    }
-                }
-            }            
-            ants[i].GetComponent<AntClass>().SetAntSpeed(workerAntSpeed);
-           // ants[i].GetComponent<AntClass>().setSecrete();
-        }
 
-        timeSinceAntReleased += Time.deltaTime;
-        ReleaseGatherers();
+                        //TODO: sort hunger out
+                        antComponent.hunger = 100f;
+                    }
+                   
+                }
+            }
+
+            antComponent.SetAntSpeed(workerAntSpeed);
+        }
+    }
+
+    public void ReleaseGatherers()
+    {
+        //
+        antReleaseFrequency = pheromonesPerAntPerSecond / (carryPheromoneCount-minimumPheromonesForAntRelease);
+
+        if (antReleaseFrequency > 0)
+        {
+            if(timeSinceAntReleased >= antReleaseFrequency)
+            {
+                // Release an ant
+                if (activeAnts < colonySize)
+                {
+                    antsInWorld++;
+                }
+                // Reset time conter
+                timeSinceAntReleased = 0f;
+            }   
+        }   
+        else if(antsInWorld > colonySize * scoutRatio)
+        {
+            antsInWorld-= Time.deltaTime * worldManager.timeRate;
+        }
+        else
+        {
+            antsInWorld = Mathf.FloorToInt(colonySize * scoutRatio);
+        }
+        //previousCarryPheromoneCount = carryPheromoneCount;
     }
 
     private void PlaceQueen()
@@ -108,7 +193,6 @@ public class QueenAnt : AntClass
 
         int smellRadius = 7;
         carryPheromoneCount = 0f;
-        CarryCount = 0f;
        
         for (int x = gridX - smellRadius; x <= gridX + smellRadius; x++)
         {
@@ -127,36 +211,11 @@ public class QueenAnt : AntClass
             }
         }
     }
-
-    public void ReleaseGatherers()
-    {
-        antReleaseRate = 100f / carryPheromoneCount;
-
-        //TODO: add colony size ie. if (numscouts < colsize) then allowed to release more
-
-        //only release at all if can smell at least e.g. 10 pheromones
-        if(antReleaseRate > 1f) {
-            if(timeSinceAntReleased >= antReleaseRate)
-            {
-                // Release an ant
-                if (activeAnts < pooledAntCount)
-                    //??
-                    
-
-                // Reset time conter
-                timeSinceAntReleased = 0f;
-            }
-        }
-            
-    }
-
     
 
 	void SpawnAnts ()
 	{
-
         GameObject parentAntGameObject = new GameObject("Ants");
-
 
 		for(int i = 0; i < pooledAntCount; i++)
         {

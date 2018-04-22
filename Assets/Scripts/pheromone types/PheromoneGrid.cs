@@ -180,8 +180,8 @@ public class PheromoneGrid : MonoBehaviour
 
         worldNestPosition = gridToWorld(gridPos);
 
-        NestPheromone node = grid [x, y].GetComponent<NestPheromone> ();
-		node.SetXY (x, y);
+        NestPheromone node = grid [x, y].GetComponent<NestPheromone> ();        
+		node.SetXY (x, y);        
 	}
 
 	public Vector3 gridToWorld(Vector3 gridPos) 
