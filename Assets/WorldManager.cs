@@ -5,8 +5,8 @@ using UnityEngine;
 public class WorldManager : MonoBehaviour
 {
 
-    public static float worldWidth = 100f;
-    public static float worldHeight = 100f;
+    public static float worldWidth = 150;
+    public static float worldHeight = 150f;
     public float timeRate = 1f;
 	// Use this for initialization
 	void Start () {

@@ -133,7 +133,7 @@ public class AntClass : MonoBehaviour
         StateActions();
         smellingFood = false;
         CollectingFood();
-        hunger -= 0.5f * Time.deltaTime * worldManager.timeRate;
+        hunger -= 0.25f * Time.deltaTime * worldManager.timeRate;
         Hunger();
     }
 
@@ -154,7 +154,7 @@ public class AntClass : MonoBehaviour
             switch (state)
             {
                 case AntState.SCOUTING:
-                    target = SmellDirection() + RandomTarget();
+                    target = SmellDirection() + RandomTarget() - (NestDirection() * 0.05f);
                     target.Normalize();
                     SetTarget(target);
                     break;
@@ -170,7 +170,7 @@ public class AntClass : MonoBehaviour
                     break;
 
                 case AntState.GATHERING:
-                    target = SmellDirection() * 1f - NestDirection() * nestPullStrength + RandomTarget();
+                    target = SmellDirection() - NestDirection() * nestPullStrength + RandomTarget();
                     target.Normalize();
                     SetTarget(target);
                     //Debug.DrawLine(transform.position, transform.position - SmellDirection());
@@ -248,8 +248,7 @@ public class AntClass : MonoBehaviour
                             {
                                 state = AntState.GATHERING;
                             }
-                            SmellForFood(x, y);                           
-                            
+                            SmellForFood(x, y);
                         }
                         //if CARRYING, head home
                         else if (state == AntState.CARRYING)
@@ -491,6 +490,8 @@ public class AntClass : MonoBehaviour
                 {
                     //food of size 100 drops nowmal pheromone amount
                     float pherMuliplier = foodItem.quantity / 100f;
+                    if (pherMuliplier < 1)
+                        pherMuliplier = 1;
 
                     pGrid.AddPheromone(antPosition, PheromoneGrid.PheromoneType.CARRYING, pherMuliplier);
                 }
@@ -506,20 +507,21 @@ public class AntClass : MonoBehaviour
     protected bool CheckTarget ()
 	{
         Vector3 tgPosition = World.instance.worldToTileGrid(targetPosition);
-        
+        Tile tile = World.instance.GetTileAt((int)tgPosition.x, (int)tgPosition.y);
 
 		if (targetPosition.x <= -WorldManager.worldWidth/2f || targetPosition.x >= WorldManager.worldWidth/2f || targetPosition.y <= -WorldManager.worldHeight/2f || targetPosition.y >= WorldManager.worldHeight/2f)
         {
 			return false;
 		}
-        else if (World.instance.GetTileAt((int)tgPosition.x, (int)tgPosition.y) == null)
+        else if (tile == null)
         {
             Debug.Log(tgPosition.x + ", " + tgPosition.y);
             return false;
         }
-        else if (World.instance.GetTileAt((int)tgPosition.x, (int)tgPosition.y).type != Tile.Type.Grass)
-        {				
-			return false;
+        else if (tile.type != Tile.Type.Grass && tile.type != Tile.Type.Dirt )
+        {			
+            
+			    return false;
 		}
         else
 			return true;

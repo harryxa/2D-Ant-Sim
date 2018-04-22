@@ -6,8 +6,8 @@ public class PheromoneGrid : MonoBehaviour
 {
     
 
-	private int pherGridHeight = 100;
-	private int pherGridWidth = 100;
+	private int pherGridHeight = 150;
+	private int pherGridWidth = 150;
 
     public Transform[,] grid;
 	public Transform pheromone;
@@ -70,7 +70,11 @@ public class PheromoneGrid : MonoBehaviour
                 //this may brake when world and grid made properly
                 if (World.instance.GetTileAt(x, y).type != Tile.Type.Grass)
                 {
-                    BoostConcentration(PheromoneType.NEGATIVE, x, y, 100f);
+                    if (World.instance.GetTileAt(x, y).type != Tile.Type.Dirt)
+                    {
+                        BoostConcentration(PheromoneType.NEGATIVE, x, y, 100f);
+
+                    }
                 }
             }
         }

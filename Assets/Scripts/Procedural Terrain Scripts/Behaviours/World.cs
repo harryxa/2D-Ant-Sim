@@ -16,8 +16,8 @@ public class World : MonoBehaviour
 	public bool randomSeed;
 
 	//determines size of mesh
-	public int tileGridWidth = 100;
-	public int tileGridHeight = 100;
+	public int tileGridWidth;
+	public int tileGridHeight;
 	public int chunkSize = 50;
 
 	//public int halfWidth;

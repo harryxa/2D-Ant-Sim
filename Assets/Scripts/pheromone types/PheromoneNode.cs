@@ -12,7 +12,7 @@ public class PheromoneNode : MonoBehaviour
 
 	//protected float evaporationRate = 0.2f;
     protected float evaporationRate = 0.5f;
-    protected float carryEvaporationRate = 0.5f;
+    protected float carryEvaporationRate = 0.3f;
 
     protected float defaultScale = 0.1f;
 
