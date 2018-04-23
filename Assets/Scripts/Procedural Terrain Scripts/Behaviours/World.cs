@@ -85,7 +85,7 @@ public class World : MonoBehaviour
 		//divide tile array into increments to create 100 x 100 tile mesh
 		SubdivideTilesArray (); 
 
-		SubdivideMountainArray ();
+		//SubdivideMountainArray ();
 
         //pheromoneGrid = new GameObject("Pheromone Grid");
         //PheromoneGrid pheromoneGridScript = pheromoneGrid.AddComponent<PheromoneGrid>();
@@ -265,86 +265,86 @@ public class World : MonoBehaviour
 	}
 
 	//MOUNTAIN TILES
-	public void SubdivideMountainArray (int index1 = 0, int index2 = 0)
-	{
-		//get size of chunk
-		int sizeX;
-		int sizeY;
+	//public void SubdivideMountainArray (int index1 = 0, int index2 = 0)
+	//{
+	//	//get size of chunk
+	//	int sizeX;
+	//	int sizeY;
 
-		//x axis
+	//	//x axis
 
-		//if tiles along x - start of chunk > chunk size
-		if (tiles.GetLength (0) - index1 > 25) {
-			sizeX = 25;
-		} else {
-			sizeX = tiles.GetLength (0) - index1;
-		}
-		//y axis
-		if (tiles.GetLength (1) - index2 > 25) {
-			sizeY = 25;
-		} else {
-			sizeY = tiles.GetLength (1) - index2;
-		}
+	//	//if tiles along x - start of chunk > chunk size
+	//	if (tiles.GetLength (0) - index1 > 25) {
+	//		sizeX = 25;
+	//	} else {
+	//		sizeX = tiles.GetLength (0) - index1;
+	//	}
+	//	//y axis
+	//	if (tiles.GetLength (1) - index2 > 25) {
+	//		sizeY = 25;
+	//	} else {
+	//		sizeY = tiles.GetLength (1) - index2;
+	//	}
 
-		//generate 100 x 100 tile mesh 
-		GenerateMountainLayer (index1, index2, sizeX, sizeY);
+	//	//generate 100 x 100 tile mesh 
+	//	GenerateMountainLayer (index1, index2, sizeX, sizeY);
 
-		if (tiles.GetLength (0) >= index1 + 25) {
-			SubdivideMountainArray (index1 + 25, index2);
-			return;
-		}
-		if (tiles.GetLength (1) >= index2 + 25) {
-			SubdivideMountainArray (0, index2 + 25);
-			return;
-		}
-	}
+	//	if (tiles.GetLength (0) >= index1 + 25) {
+	//		SubdivideMountainArray (index1 + 25, index2);
+	//		return;
+	//	}
+	//	if (tiles.GetLength (1) >= index2 + 25) {
+	//		SubdivideMountainArray (0, index2 + 25);
+	//		return;
+	//	}
+	//}
 
 	//create mesh from MeshData, mountain layer is true
-	void GenerateMountainLayer (int x, int y, int width, int height)
-	{
-		//create mesh at coords of 100 x 100 tiles
-		MountainData = new MeshData (x, y, width, height, true);
+	//void GenerateMountainLayer (int x, int y, int width, int height)
+	//{
+	//	//create mesh at coords of 100 x 100 tiles
+	//	MountainData = new MeshData (x, y, width, height, true);
 
-		//new chunk gameobject, child of world, with id
-		GameObject meshGO = new GameObject ("MountainLayer " + meshGOMountainvalue);
+	//	//new chunk gameobject, child of world, with id
+	//	GameObject meshGO = new GameObject ("MountainLayer " + meshGOMountainvalue);
 
-		MeshGameObject mountainMeshScript = meshGO.AddComponent<MeshGameObject> ();
+	//	MeshGameObject mountainMeshScript = meshGO.AddComponent<MeshGameObject> ();
 
-		//The script on the mountain mesh is aware of its coords and width/height
-		mountainMeshScript.X = x;
-		mountainMeshScript.Y = y;
-		mountainMeshScript.Width = width;
-		mountainMeshScript.Height = height;
+	//	//The script on the mountain mesh is aware of its coords and width/height
+	//	mountainMeshScript.X = x;
+	//	mountainMeshScript.Y = y;
+	//	mountainMeshScript.Width = width;
+	//	mountainMeshScript.Height = height;
 
-		meshGO.transform.SetParent (this.transform);
+	//	meshGO.transform.SetParent (this.transform);
 
-		//add a mesh filter and renderer
-		MeshFilter filter = meshGO.AddComponent <MeshFilter> ();
-		MeshRenderer render = meshGO.AddComponent<MeshRenderer> ();
-		render.material = material;
+	//	//add a mesh filter and renderer
+	//	MeshFilter filter = meshGO.AddComponent <MeshFilter> ();
+	//	MeshRenderer render = meshGO.AddComponent<MeshRenderer> ();
+	//	render.material = material;
 
-		//render the mountains layer infront of everything else
-		render.sortingOrder = 1;
-		Mesh mesh = filter.mesh;
+	//	//render the mountains layer infront of everything else
+	//	render.sortingOrder = 1;
+	//	Mesh mesh = filter.mesh;
 
-		//create vertices, triangles and uvs from meshdata
-		mesh.vertices = MountainData.vertices.ToArray ();
-		mesh.triangles = MountainData.triangles.ToArray ();
+	//	//create vertices, triangles and uvs from meshdata
+	//	mesh.vertices = MountainData.vertices.ToArray ();
+	//	mesh.triangles = MountainData.triangles.ToArray ();
 
-		mesh.uv = MountainData.UVs.ToArray ();
+	//	mesh.uv = MountainData.UVs.ToArray ();
 
-		//each tile is told its mesh's value
-		for (int i = x; i < x + width; i++) {
-			for (int j = y; j < y + height; j++) {
-				tiles [i, j].MountainChunkNumber = meshGOMountainvalue;
-			}
-		}
+	//	//each tile is told its mesh's value
+	//	for (int i = x; i < x + width; i++) {
+	//		for (int j = y; j < y + height; j++) {
+	//			tiles [i, j].MountainChunkNumber = meshGOMountainvalue;
+	//		}
+	//	}
 
-		meshGOMountainvalue++;
+	//	meshGOMountainvalue++;
 
-		meshGO.transform.position = new Vector3 (-tileGridWidth/2, -tileGridHeight/2, 0);
+	//	meshGO.transform.position = new Vector3 (-tileGridWidth/2, -tileGridHeight/2, 0);
 
-	}
+	//}
 
 	//redraws chunk dependant on the chunk number
 	public void OnTileTypeChange (int chunkNumber)
@@ -360,23 +360,23 @@ public class World : MonoBehaviour
 	}
 
 	//deletes mountain mesh and redraws(redraws all atm)
-	public void OnMountainChange ()
-	{
+	//public void OnMountainChange ()
+	//{
 		
-		//update mountainlayer mesh
+	//	//update mountainlayer mesh
 
-		for (int j = 0; j < meshGOMountainvalue; j++) {
-			GameObject mountainChunk = GameObject.Find ("MountainLayer " + j);
+	//	for (int j = 0; j < meshGOMountainvalue; j++) {
+	//		GameObject mountainChunk = GameObject.Find ("MountainLayer " + j);
 
 
-			Destroy (mountainChunk);
-		}
+	//		Destroy (mountainChunk);
+	//	}
 
-		meshGOMountainvalue = 0;
+	//	meshGOMountainvalue = 0;
 
-		SubdivideMountainArray ();
+	//	//SubdivideMountainArray ();
 
-	}
+	//}
 
 	void RandomizeMap ()
 	{		
@@ -403,7 +403,7 @@ public class World : MonoBehaviour
 			OnTileTypeChange (i);
 		}
 
-		OnMountainChange ();
+		//OnMountainChange ();
 	}
 
 	void SquareMap ()
@@ -435,7 +435,7 @@ public class World : MonoBehaviour
 			OnTileTypeChange (i);
 		}
 
-		OnMountainChange ();
+		//OnMountainChange ();
 	}
 		
 	public Tile GetTileAt (int x, int y)

@@ -23,7 +23,7 @@ public class PheromoneNode : MonoBehaviour
     //PHEROMONE TYPES
 	public float pheromoneConcentration = 0f;
     public float nestConcentration = 0f;
-    public float carryConcentration = 0f;
+    public float gatheringConcentration = 0f;
     public float negativeConcentration = 0f;
 
 
@@ -57,7 +57,7 @@ public class PheromoneNode : MonoBehaviour
 
     public void BoostCarryConc(float multiplier) 
 	{
-		carryConcentration += defaultConc * multiplier;
+		gatheringConcentration += defaultConc * multiplier;
 	}
 
     public void SetXY(int x, int y)
@@ -77,7 +77,7 @@ public class PheromoneNode : MonoBehaviour
 
 			pheromoneConcentration -= evaporationRate * Time.deltaTime * worldManager.timeRate;
 
-            if (pheromoneConcentration > carryConcentration)
+            if (pheromoneConcentration > gatheringConcentration)
             {
                 float scale = (pheromoneConcentration / defaultConc) * defaultScale;
                 transform.localScale = new Vector3(scale, scale, scale);
@@ -86,20 +86,20 @@ public class PheromoneNode : MonoBehaviour
                 pheromoneConcentration = 0f;
 		}
         //CARRY PHEROMONE
-		if (carryConcentration > 0f) 
+		if (gatheringConcentration > 0f) 
 		{
-			if (carryConcentration > maxConc)
-				carryConcentration = maxConc;
+			if (gatheringConcentration > maxConc)
+				gatheringConcentration = maxConc;
 
-			carryConcentration -= carryEvaporationRate * Time.deltaTime * worldManager.timeRate;
+			gatheringConcentration -= carryEvaporationRate * Time.deltaTime * worldManager.timeRate;
 
-            if (pheromoneConcentration < carryConcentration)
+            if (pheromoneConcentration < gatheringConcentration)
             {
-                float scale = (carryConcentration / defaultConc) * defaultScale;
+                float scale = (gatheringConcentration / defaultConc) * defaultScale;
                 transform.localScale = new Vector3(scale, scale, scale);
             }
-            if (carryConcentration < 0)
-                carryConcentration = 0f;
+            if (gatheringConcentration < 0)
+                gatheringConcentration = 0f;
 
         }
 		if (negativeConcentration > 0)
@@ -110,7 +110,7 @@ public class PheromoneNode : MonoBehaviour
 
     public void ChangePheromoneColour()
     {
-        if (carryConcentration > 0)
+        if (gatheringConcentration > 0)
         {
             if (m_spriteRenderer.color != Color.blue)
                 m_spriteRenderer.color = Color.blue;

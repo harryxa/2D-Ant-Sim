@@ -94,7 +94,7 @@ public class QueenAnt : AntClass
             AntClass antComponent = ants[i].GetComponent<AntClass>();
             if (antComponent.state == AntState.DEAD)
             {
-                Debug.Log("ant deyd");
+                Debug.Log("ant died at: " + transform.position);
                 activeAnts--;
                 colonySize--;
                 ants[i].transform.position = nest.transform.position;
@@ -202,9 +202,9 @@ public class QueenAnt : AntClass
                 {
                     if (pGrid.grid[x, y] != null)
                     {
-                        if (pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration >= 1)
+                        if (pGrid.grid[x, y].GetComponent<PheromoneNode>().gatheringConcentration >= 1)
                         {
-                            carryPheromoneCount += pGrid.grid[x, y].GetComponent<PheromoneNode>().carryConcentration;
+                            carryPheromoneCount += pGrid.grid[x, y].GetComponent<PheromoneNode>().gatheringConcentration;
                         }
                     }
                 }

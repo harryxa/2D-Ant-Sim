@@ -149,7 +149,7 @@ public class MouseManager : MonoBehaviour
                         }
                     }
                 }
-                World.instance.OnMountainChange();
+                //World.instance.OnMountainChange();
             }        
 		}
 

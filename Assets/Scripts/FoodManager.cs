@@ -8,7 +8,7 @@ public class FoodManager : MonoBehaviour {
     private WorldManager worldManager;
 
     private float timeSinceFoodDrop;
-    private float foodDropFrequency = 180f;
+    private float foodDropFrequency = 120f;
 
 
 
@@ -18,7 +18,7 @@ public class FoodManager : MonoBehaviour {
         worldManager = GameObject.FindWithTag("WorldManager").GetComponent<WorldManager>();
         pGrid = GameObject.FindWithTag("PGrid").GetComponent<PheromoneGrid>();
         //worldManager = GameObject.FindWithTag("WorldManager").GetComponent<WorldManager>();
-        pGrid.addFood(FoodPosition());
+        //pGrid.addFood(FoodPosition());
 
 
 
