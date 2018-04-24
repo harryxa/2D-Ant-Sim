@@ -164,13 +164,13 @@ public class QueenAnt : AntClass
 
     private void PlaceQueen()
     {
-        transform.position = new Vector3(Random.Range(-WorldManager.worldWidth/2f, WorldManager.worldWidth/2f),
-                                             Random.Range(-WorldManager.worldHeight/2f, WorldManager.worldHeight/2f),
+        transform.position = new Vector3(Random.Range(-WorldManager.worldWidth/4f, WorldManager.worldWidth/4f),
+                                             Random.Range(-WorldManager.worldHeight/4f, WorldManager.worldHeight/4f),
                                              0f);
 
         while (!PositionSafe(transform.position))
-            transform.position = new Vector3(Random.Range(-WorldManager.worldWidth/2f, WorldManager.worldWidth/2f),
-                                             Random.Range(-WorldManager.worldHeight/2f, WorldManager.worldHeight/2f),
+            transform.position = new Vector3(Random.Range(-WorldManager.worldWidth/4f, WorldManager.worldWidth/4f),
+                                             Random.Range(-WorldManager.worldHeight/4f, WorldManager.worldHeight/4f),
                                              0f);
     }
 

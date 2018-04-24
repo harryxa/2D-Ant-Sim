@@ -19,9 +19,7 @@ public class FoodManager : MonoBehaviour {
         pGrid = GameObject.FindWithTag("PGrid").GetComponent<PheromoneGrid>();
         //worldManager = GameObject.FindWithTag("WorldManager").GetComponent<WorldManager>();
         //pGrid.addFood(FoodPosition());
-
-
-
+        timeSinceFoodDrop = foodDropFrequency - 2f;
     }
 
     // Update is called once per frame
