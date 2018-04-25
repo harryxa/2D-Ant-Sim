@@ -80,10 +80,7 @@ public class AntClass : MonoBehaviour
     public float maxHunger = 100f;
     public bool atNest;
 
-    private float nestPullStrength = 0.9f;
-
-
-   
+    private float nestPullStrength = 0.9f;  
 
     private float starvationValue = -50f;
 
@@ -207,11 +204,6 @@ public class AntClass : MonoBehaviour
         int gridX = (int)antGridPos.x;
         int gridY = (int)antGridPos.y;
 
-        //smellDirection = ants position
-
-        //CHANGES HERE
-
-        //smellDirection = new Vector3(antGridPos.x, antGridPos.y, 0f);
         smellDirection = Vector3.zero;
         Vector3 negDir = Vector3.zero;
 
@@ -235,9 +227,7 @@ public class AntClass : MonoBehaviour
                         negDir = pherDir;
                         negDir.Normalize();
                         negDir *= -pGrid.grid[x, y].GetComponent<PheromoneNode>().negativeConcentration;
-
                         carryPheromoneCount += pGrid.grid[x, y].GetComponent<PheromoneNode>().gatheringConcentration;
-
 
                         //if WANDERING smell for food and randomly wander around the map
                         //set state to carry if food found                        
@@ -256,7 +246,6 @@ public class AntClass : MonoBehaviour
                             if (pGrid.grid[x, y].GetComponent<PheromoneNode>().gatheringConcentration >= 1 ||
                                 pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration >= 1)
                             {
-
                                 if(carryPheromoneCount < 400)
                                 {
                                     pherDir.Normalize();
@@ -268,7 +257,6 @@ public class AntClass : MonoBehaviour
                                     pherDir.Normalize();
                                     pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().pheromoneConcentration
                                         + pGrid.grid[x, y].GetComponent<PheromoneNode>().gatheringConcentration;
-
                                     smellDirection += pherDir;
                                 }
                             }
@@ -281,8 +269,6 @@ public class AntClass : MonoBehaviour
                                 pherDir.Normalize();
                                 pherDir *= pGrid.grid[x, y].GetComponent<PheromoneNode>().gatheringConcentration;
                                 smellDirection += pherDir;
-
-                                //value to determine 
                             }
                             SmellForFood(x, y);                         
                         }                       
@@ -294,20 +280,12 @@ public class AntClass : MonoBehaviour
 
                             smellDirection += pherDir;
                         }
-                        else if(state == AntState.DEBUG)
-                        {
-
-                        }
-
                         smellDirection += negDir;
-
                     }
                 }
             }
         }
-
-        smellDirection.Normalize();        
-
+        smellDirection.Normalize();
         return smellStrength * smellDirection;
     }
 

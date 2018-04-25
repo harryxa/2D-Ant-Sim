@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.EventSystems;
 
 public class MouseManager : MonoBehaviour
 {
@@ -64,94 +65,99 @@ public class MouseManager : MonoBehaviour
 			dragStart = currMousePos;
 		}
 
-
-        // left click mouse click
-        if (Input.GetMouseButtonUp(0))
+        if (!EventSystem.current.IsPointerOverGameObject())
         {
-            Vector3 placement = new Vector3(currMousePosAnts.x - 0.5f, currMousePosAnts.y - 0.5f, 0);
-
-
-            if (pheromone == true)
+            // left click mouse click
+            if (Input.GetMouseButtonUp(0))
             {
-                pGrid.AddPheromone(placement, PheromoneGrid.PheromoneType.STANDARD, 1.0f);
-            }
-            else if(food == true)
-            {
-                pGrid.addFood(placement);
-            }
-            else if(ant == true)
-            {
-
-            }
-            else if(carryP == true)
-            {
-                pGrid.AddPheromone(placement, PheromoneGrid.PheromoneType.CARRYING, 3f);
-            }
+                Vector3 placement = new Vector3(currMousePosAnts.x - 0.5f, currMousePosAnts.y - 0.5f, 0);
 
 
-
-
-            else if (placeTile == true)
-            {
-                Tile previousTile = null;
-                int startX = Mathf.FloorToInt(dragStart.x);
-                int endX = Mathf.FloorToInt(currMousePos.x);
-
-                int startY = Mathf.FloorToInt(dragStart.y);
-                int endY = Mathf.FloorToInt(currMousePos.y);
-
-                if (endX < startX)
+                if (pheromone == true)
                 {
-                    int temp = endX;
-                    endX = startX;
-                    startX = temp;
+                    pGrid.AddPheromone(placement, PheromoneGrid.PheromoneType.STANDARD, 1.0f);
                 }
-                if (endY < startY)
+                else if (food == true)
                 {
-                    int temp = endY;
-                    endY = startY;
-                    startY = temp;
+                    pGrid.addFood(placement);
+                }
+                else if (ant == true)
+                {
+
+                }
+                else if (carryP == true)
+                {
+                    pGrid.AddPheromone(placement, PheromoneGrid.PheromoneType.CARRYING, 3f);
                 }
 
-                for (int x = startX; x <= endX; x++)
+
+
+
+                else if (placeTile == true)
                 {
-                    for (int y = startY; y <= endY; y++)
+                    Tile previousTile = null;
+                    int startX = Mathf.FloorToInt(dragStart.x);
+                    int endX = Mathf.FloorToInt(currMousePos.x);
+
+                    int startY = Mathf.FloorToInt(dragStart.y);
+                    int endY = Mathf.FloorToInt(currMousePos.y);
+
+                    if (endX < startX)
                     {
-                        Tile t = World.instance.GetTileAt(x, y);
-
-                        if (t != null)
-                        {
-                            t.type = tileSelected.type;
-                            t.wall = tileSelected.wall;
-                        }                        
+                        int temp = endX;
+                        endX = startX;
+                        startX = temp;
                     }
-                }
-
-
-                for (int x = startX; x <= endX; x++)
-                {
-                    for (int y = startY; y <= endY; y++)
+                    if (endY < startY)
                     {
-                        Tile t = World.instance.GetTileAt(x, y);
+                        int temp = endY;
+                        endY = startY;
+                        startY = temp;
+                    }
 
-                        if (t != null)
+                    for (int x = startX; x <= endX; x++)
+                    {
+                        for (int y = startY; y <= endY; y++)
                         {
-                            if (previousTile == null)
+                            Tile t = World.instance.GetTileAt(x, y);
+
+                            if (t != null)
                             {
-                                previousTile = t;
-                                World.instance.OnTileTypeChange(t.chunkNumber);
+                                t.type = tileSelected.type;
+                                t.wall = tileSelected.wall;
                             }
-
-                            if (t.chunkNumber != previousTile.chunkNumber)
-                                World.instance.OnTileTypeChange(t.chunkNumber);
-
-                            previousTile = t;
                         }
                     }
+
+
+                    for (int x = startX; x <= endX; x++)
+                    {
+                        for (int y = startY; y <= endY; y++)
+                        {
+                            Tile t = World.instance.GetTileAt(x, y);
+
+                            if (t != null)
+                            {
+                                if (previousTile == null)
+                                {
+                                    previousTile = t;
+                                    World.instance.OnTileTypeChange(t.chunkNumber);
+                                }
+
+                                if (t.chunkNumber != previousTile.chunkNumber)
+                                    World.instance.OnTileTypeChange(t.chunkNumber);
+
+                                previousTile = t;
+                            }
+                        }
+                    }
+                    //World.instance.OnMountainChange();
                 }
-                //World.instance.OnMountainChange();
-            }        
-		}
+            }
+
+
+        }
+       
 
 		//screen dragging using middle and right click
 		if (Input.GetMouseButton (1) || Input.GetMouseButton (2)) {
