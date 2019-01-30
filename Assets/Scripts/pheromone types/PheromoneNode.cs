@@ -123,8 +123,8 @@ public class PheromoneNode : MonoBehaviour
         
         else if (negativeConcentration > 0)
         {
-            if (m_spriteRenderer.color != Color.black)
-                m_spriteRenderer.color = Color.black;
+            if (m_spriteRenderer.color != Color.clear)
+                m_spriteRenderer.color = Color.clear;
         }
     }
 

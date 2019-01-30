@@ -9,7 +9,7 @@ public class MouseManager : MonoBehaviour
 
 	public GameObject cursor;
 	Vector3 lastMousePosition;
-
+    public float cursorClickOffset;
 	//scrolling or zooming
 	float minFov = 10f;
 	float maxFov = 100f;
@@ -70,7 +70,7 @@ public class MouseManager : MonoBehaviour
             // left click mouse click
             if (Input.GetMouseButtonUp(0))
             {
-                Vector3 placement = new Vector3(currMousePosAnts.x - 0.5f, currMousePosAnts.y - 0.5f, 0);
+                Vector3 placement = new Vector3(currMousePosAnts.x + cursorClickOffset, currMousePosAnts.y + cursorClickOffset, 0);
 
 
                 if (pheromone == true)
