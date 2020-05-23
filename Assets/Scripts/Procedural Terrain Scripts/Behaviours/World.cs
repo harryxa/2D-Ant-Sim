@@ -121,8 +121,10 @@ public class World : MonoBehaviour
 		//returns a perlin noise value
 		float[,] noiseValues = noise.GetNoiseValues (tileGridWidth, tileGridHeight);
 
-		for (int i = 0; i < tileGridWidth; i++) {
-			for (int j = 0; j < tileGridHeight; j++) {				
+		for (int i = 0; i < tileGridWidth; i++)
+        {
+			for (int j = 0; j < tileGridHeight; j++)
+            {				
 				//initalise each tile in tiles array
 				tiles [i, j] = SetTileAtHeight (noiseValues [i, j]);
 				tiles [i, j].X = i - tileGridWidth/2;
@@ -137,7 +139,8 @@ public class World : MonoBehaviour
 		//if tile hasnt been initialised return new tile type
 
 		if (tile == null) {
-			if (currentHeight <= deepWaterEnd) {
+			if (currentHeight <= deepWaterEnd)
+            {
 				return new Tile (Tile.Type.Deep_Water);
 			}
 			if (currentHeight >= shallowWaterStart && currentHeight <= shallowWaterEnd) {
@@ -164,9 +167,11 @@ public class World : MonoBehaviour
 		} 
 		//else change tile type
 		else {
-			if (currentHeight <= deepWaterEnd) {
+			if (currentHeight <= deepWaterEnd)
+            {
 				tile.type = Tile.Type.Deep_Water;
-			} else if (currentHeight >= shallowWaterStart && currentHeight <= shallowWaterEnd) {
+			}
+            else if (currentHeight >= shallowWaterStart && currentHeight <= shallowWaterEnd) {
 				tile.type = Tile.Type.Shallow_Water;			
 			} else if (currentHeight >= sandStartHeight && currentHeight <= sandEndHeight) {
 				tile.type = Tile.Type.Sand;

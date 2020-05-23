@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AntEditor : MonoBehaviour
 {
-    private List<GameObject> ants;
+    private List<GameObject> ants = new List<GameObject>();
     private QueenAnt queenAnt;
 
     public float antSpeed;

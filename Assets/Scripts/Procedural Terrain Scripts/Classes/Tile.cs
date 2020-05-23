@@ -7,8 +7,11 @@ using System;
 public class Tile
 {
 	public bool changed = false;
+    private int y;
+    private int x;
 
-	public enum Type
+
+    public enum Type
 	{
 		Dirt,
 		Grass,
@@ -57,7 +60,6 @@ public class Tile
 	}
 
 	//Coords for the tile
-	int x;
 	public int X {
 		get {
 			return x;
@@ -67,7 +69,6 @@ public class Tile
 		}
 	}
 
-	int y;
 	public int Y {
 		get {
 			return y;

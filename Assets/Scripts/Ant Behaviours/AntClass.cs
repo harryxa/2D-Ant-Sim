@@ -462,6 +462,7 @@ public class AntClass : MonoBehaviour
     //secretes a pheremone where the ant is currently standing
     private void Secrete ()
     {
+        
         // previous +0.5s mean this is now the same as transform.position
         // SCHEDULED FOR REMOVAL
         Vector3 antPosition = new Vector3(transform.position.x, transform.position.y, 0);
@@ -500,22 +501,24 @@ public class AntClass : MonoBehaviour
 
     protected bool CheckTarget ()
 	{
-        Vector3 tgPosition = World.instance.worldToTileGrid(targetPosition);
-        Tile tile = World.instance.GetTileAt((int)tgPosition.x, (int)tgPosition.y);
+        Vector3 targetPos = World.instance.worldToTileGrid(targetPosition);
+        Tile tile = World.instance.GetTileAt((int)targetPos.x, (int)targetPos.y);
 
+        //if outside of map return false
 		if (targetPosition.x <= -WorldManager.worldWidth/2f || targetPosition.x >= WorldManager.worldWidth/2f || targetPosition.y <= -WorldManager.worldHeight/2f || targetPosition.y >= WorldManager.worldHeight/2f)
         {
 			return false;
 		}
+        //if no tile return false
         else if (tile == null)
         {
-            Debug.Log(tgPosition.x + ", " + tgPosition.y);
+            Debug.Log(targetPos.x + ", " + targetPos.y);
             return false;
         }
+        //if unwalkable tile return false
         else if (tile.type != Tile.Type.Grass && tile.type != Tile.Type.Dirt )
-        {			
-            
-			    return false;
+        {			            
+			return false;
 		}
         else
 			return true;
